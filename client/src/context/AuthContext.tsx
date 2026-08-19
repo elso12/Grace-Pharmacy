@@ -1,6 +1,6 @@
 /**
  * ═══════════════════════════════════════════════════════════════════════════
- * ─── PharmFlow — Authentication Context ─────────────────────────────────
+ * ─── Grace Pharmacy — Authentication Context ─────────────────────────────────
  * ═══════════════════════════════════════════════════════════════════════════
  *
  * Single source of truth for authentication state across the entire app.
@@ -39,8 +39,8 @@ import api from '../services/api';
 
 // ─── localStorage key constants ───────────────────────────────────────────────
 // Use these everywhere — never inline the string literals.
-export const LS_TOKEN = 'pharmflow_token';
-export const LS_USER  = 'pharmflow_user';
+export const LS_TOKEN = 'grace_pharmacy_token';
+export const LS_USER  = 'grace_pharmacy_user';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 

@@ -1,8 +1,8 @@
-# PharmFlow - Enterprise Pharmacy Management System
+# Grace Pharmacy - Enterprise Pharmacy Management System
 
-![PharmFlow Hero Image](https://images.unsplash.com/photo-1587854692152-cbe660dbde88?auto=format&fit=crop&q=80&w=1200)
+![Grace Pharmacy Hero Image](https://images.unsplash.com/photo-1587854692152-cbe660dbde88?auto=format&fit=crop&q=80&w=1200)
 
-**PharmFlow** is a modern, enterprise-grade B2B and B2C pharmacy management platform. It offers a stunning patient-facing storefront, a high-speed cashier Point of Sale (POS) system, and a robust administrative backend featuring automated First-Expire, First-Out (FEFO) inventory management and Role-Based Access Control (RBAC).
+**Grace Pharmacy** is a modern, enterprise-grade B2B and B2C pharmacy management platform. It offers a stunning patient-facing storefront, a high-speed cashier Point of Sale (POS) system, and a robust administrative backend featuring automated First-Expire, First-Out (FEFO) inventory management and Role-Based Access Control (RBAC).
 
 ## ✨ Key Features
 
@@ -37,8 +37,8 @@
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/yourusername/pharmacy-management-system.git
-   cd pharmacy-management-system
+   git clone https://github.com/elso12/Grace-Pharmacy.git
+   cd Grace-Pharmacy
    ```
 
 2. **Setup the Backend:**

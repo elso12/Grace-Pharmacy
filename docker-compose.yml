@@ -2,7 +2,7 @@ services:
   # 1. MongoDB Database
   mongo:
     image: mongo:latest
-    container_name: pharmflow-mongo
+    container_name: grace-pharmacy-mongo
     ports:
       - "27017:27017"
     volumes:
@@ -11,12 +11,12 @@ services:
   # 2. Node.js Express Backend
   server:
     build: ./server
-    container_name: pharmflow-server
+    container_name: grace-pharmacy-server
     ports:
       - "5000:5000"
     environment:
       - PORT=5000
-      - MONGO_URI=mongodb://mongo:27017/pharmflow
+      - MONGO_URI=mongodb://mongo:27017/grace-pharmacy
       - JWT_SECRET=my_super_secret_key_123
     depends_on:
       - mongo
@@ -24,7 +24,7 @@ services:
   # 3. React Vite Frontend
   client:
     build: ./client
-    container_name: pharmflow-client
+    container_name: grace-pharmacy-client
     ports:
       - "5173:5173"
     environment:

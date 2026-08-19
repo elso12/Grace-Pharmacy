@@ -1,6 +1,6 @@
 /**
  * ═══════════════════════════════════════════════════════════════════════════
- * ─── PharmFlow — Express Application Entry Point ────────────────────────
+ * ─── Grace Pharmacy — Express Application Entry Point ────────────────────────
  * ═══════════════════════════════════════════════════════════════════════════
  *
  * Middleware order matters — this file is ordered deliberately:
@@ -149,7 +149,7 @@ const bootstrap = async (): Promise<void> => {
 
   server.listen(PORT, () => {
     console.log(`\n  ┌──────────────────────────────────────────┐`);
-    console.log(`  │  PharmFlow Server running on port ${PORT}   │`);
+    console.log(`  │  Grace Pharmacy Server running on port ${PORT}   │`);
     console.log(`  │  CORS origin: ${process.env.CLIENT_URL || 'http://localhost:5173'}   │`);
     console.log(`  │  Environment: ${process.env.NODE_ENV || 'development'}              │`);
     console.log(`  └──────────────────────────────────────────┘\n`);

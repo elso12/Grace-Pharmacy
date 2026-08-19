@@ -43,7 +43,7 @@ const StorefrontLayout: React.FC = () => {
                 <Pill className="h-6 w-6" />
               </div>
               <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">
-                PharmFlow Store
+                Grace Pharmacy Store
               </span>
             </Link>
 
@@ -206,7 +206,7 @@ const StorefrontLayout: React.FC = () => {
             <div className="space-y-4">
               <div className="flex items-center gap-2 text-white">
                 <Pill className="h-6 w-6 text-blue-500" />
-                <span className="text-xl font-bold">PharmFlow</span>
+                <span className="text-xl font-bold">Grace Pharmacy</span>
               </div>
               <p className="text-sm text-slate-400">
                 Your trusted local pharmacy, now online. Fast delivery and genuine products guaranteed.
@@ -238,14 +238,14 @@ const StorefrontLayout: React.FC = () => {
               <h3 className="text-sm font-semibold text-white uppercase tracking-wider mb-4">Contact</h3>
               <ul className="space-y-3 text-sm">
                 <li>123 Health Ave, Medical District</li>
-                <li>support@pharmflow.com</li>
+                <li>support@gracepharmacy.com</li>
                 <li>1-800-PHARMACY</li>
               </ul>
             </div>
           </div>
 
           <div className="mt-12 pt-8 border-t border-slate-800 text-sm text-center text-slate-500">
-            &copy; {new Date().getFullYear()} PharmFlow Pharmacy. All rights reserved.
+            &copy; {new Date().getFullYear()} Grace Pharmacy. All rights reserved.
           </div>
         </div>
       </footer>

@@ -1,8 +1,8 @@
 {
-  "name": "pharmacy-management-system",
+  "name": "grace-pharmacy",
   "version": "1.0.0",
   "private": true,
-  "description": "Modern Pharmacy Management System — MERN + TypeScript monorepo",
+  "description": "Grace Pharmacy — MERN + TypeScript monorepo",
   "scripts": {
     "dev": "concurrently -n server,client -c cyan,magenta \"npm run dev:server\" \"npm run dev:client\"",
     "dev:server": "npm --prefix server run dev",

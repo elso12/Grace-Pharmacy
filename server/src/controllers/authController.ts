@@ -1,6 +1,6 @@
 /**
  * ═══════════════════════════════════════════════════════════════════════════
- * ─── PharmFlow — Authentication Controller ──────────────────────────────
+ * ─── Grace Pharmacy — Authentication Controller ──────────────────────────────
  * ═══════════════════════════════════════════════════════════════════════════
  *
  * Handles user registration and login with enterprise-grade error handling.

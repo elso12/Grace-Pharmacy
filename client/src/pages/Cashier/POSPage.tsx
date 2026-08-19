@@ -875,7 +875,7 @@ const POSPage: React.FC = () => {
             {/* The Actual Receipt Content */}
             <div className="receipt-content p-8 bg-white text-slate-900">
               <div className="text-center mb-6">
-                <h2 className="text-2xl font-bold uppercase tracking-widest text-slate-900">PHARMFLOW</h2>
+                <h2 className="text-2xl font-bold uppercase tracking-widest text-slate-900">GRACE PHARMACY</h2>
                 <p className="text-sm text-slate-500 mt-1">123 Health Ave, Medical City</p>
                 <div className="mt-4 pb-4 border-b border-dashed border-slate-300">
                   <p className="text-sm font-mono text-slate-600">Order: {printReceiptData.orderNumber}</p>

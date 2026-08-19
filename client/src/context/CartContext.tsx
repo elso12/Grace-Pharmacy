@@ -1,6 +1,6 @@
 /**
  * ═══════════════════════════════════════════════════════════════════════════
- * ─── PharmFlow — Shopping Cart Context ──────────────────────────────────
+ * ─── Grace Pharmacy — Shopping Cart Context ──────────────────────────────────
  * ═══════════════════════════════════════════════════════════════════════════
  *
  * Single source of truth for the B2C shopping cart.
@@ -34,7 +34,7 @@ import React, {
 import type { Product } from '../services/productApi';
 
 // ─── localStorage key ─────────────────────────────────────────────────────────
-const LS_CART_KEY = 'pharmflow_cart';
+const LS_CART_KEY = 'grace_pharmacy_cart';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
