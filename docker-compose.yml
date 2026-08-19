@@ -1,0 +1,36 @@
+services:
+  # 1. MongoDB Database
+  mongo:
+    image: mongo:latest
+    container_name: pharmflow-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+  # 2. Node.js Express Backend
+  server:
+    build: ./server
+    container_name: pharmflow-server
+    ports:
+      - "5000:5000"
+    environment:
+      - PORT=5000
+      - MONGO_URI=mongodb://mongo:27017/pharmflow
+      - JWT_SECRET=my_super_secret_key_123
+    depends_on:
+      - mongo
+
+  # 3. React Vite Frontend
+  client:
+    build: ./client
+    container_name: pharmflow-client
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_BASE_URL=http://localhost:5000/api
+    depends_on:
+      - server
+
+volumes:
+  mongo-data:
