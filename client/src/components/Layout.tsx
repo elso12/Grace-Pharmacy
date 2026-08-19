@@ -1,0 +1,178 @@
+import React, { useState } from 'react';
+import { NavLink, Outlet } from 'react-router-dom';
+import {
+  LayoutDashboard,
+  ShoppingCart,
+  Package,
+  Menu,
+  X,
+  ChevronDown,
+  Pill,
+  Users,
+  ActivitySquare,
+  FileCheck,
+  Archive,
+  FileBarChart,
+  TrendingUp,
+  Settings,
+} from 'lucide-react';
+import NotificationBell from './NotificationBell';
+import LiveChatWidget from './LiveChatWidget';
+
+import { useAuth } from '../context/AuthContext';
+
+/* ── Navigation items ───────────────────────────────────────────────── */
+interface NavItem {
+  label: string;
+  path: string;
+  icon: React.ReactNode;
+  hideForRoles?: string[];
+  roles?: string[];
+}
+
+const navItems: NavItem[] = [
+  { path: '/admin', label: 'Dashboard', icon: <LayoutDashboard size={20} />, roles: ['ADMIN'] },
+  { path: '/admin/pos', label: 'POS Terminal', icon: <ShoppingCart size={20} />, roles: ['ADMIN', 'CASHIER', 'PHARMACIST'] },
+  { path: '/admin/pharmacist-dashboard', label: 'Pharmacy Desk', icon: <ActivitySquare size={20} />, roles: ['ADMIN', 'PHARMACIST'] },
+  { path: '/admin/prescriptions', label: 'Rx Queue', icon: <FileCheck size={20} />, roles: ['ADMIN', 'PHARMACIST'] },
+  { path: '/admin/pick-list', label: 'Pick List Queue', icon: <FileCheck size={20} />, roles: ['ADMIN', 'PHARMACIST', 'TECHNICIAN'] },
+  { path: '/admin/shelf-directory', label: 'Shelf Directory', icon: <Archive size={20} />, roles: ['ADMIN', 'PHARMACIST', 'TECHNICIAN'] },
+  { path: '/admin/cycle-count', label: 'Cycle Count', icon: <FileBarChart size={20} />, roles: ['ADMIN', 'PHARMACIST', 'TECHNICIAN'] },
+  { path: '/admin/inventory', label: 'Inventory', icon: <Package size={20} />, roles: ['ADMIN', 'PHARMACIST'] },
+  { path: '/admin/reports', label: 'Reports', icon: <TrendingUp size={20} />, roles: ['ADMIN'] },
+  { path: '/admin/users', label: 'Users & Roles', icon: <Users size={20} />, roles: ['ADMIN'] },
+  { path: '/admin/audit', label: 'Audit Logs', icon: <Settings size={20} />, roles: ['ADMIN'] },
+];
+
+/* ── Layout ─────────────────────────────────────────────────────────── */
+const Layout: React.FC = () => {
+  const { user } = useAuth();
+  const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
+
+  const linkBase =
+    'flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200';
+  const linkActive =
+    'bg-gradient-to-r from-blue-600/20 to-indigo-600/10 text-blue-400 shadow-sm shadow-blue-500/10';
+  const linkInactive =
+    'text-slate-400 hover:bg-white/5 hover:text-slate-200';
+
+  return (
+    <div className="flex h-screen overflow-hidden bg-slate-950 font-['Inter',sans-serif]">
+      {/* ── Sidebar overlay (mobile) ─────────────────────────────────── */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 z-30 bg-black/60 backdrop-blur-sm lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      {/* ── Sidebar ──────────────────────────────────────────────────── */}
+      <aside
+        className={`
+          fixed inset-y-0 left-0 z-40 flex w-72 flex-col
+          border-r border-white/[0.06] bg-slate-900/80 backdrop-blur-xl
+          transition-transform duration-300 ease-in-out
+          lg:static lg:translate-x-0
+          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+        `}
+      >
+        {/* Brand */}
+        <div className="flex h-16 items-center gap-3 px-6">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 shadow-lg shadow-blue-500/25">
+            <Pill size={18} className="text-white" />
+          </div>
+          <span className="text-lg font-bold tracking-tight text-white">
+            Pharm<span className="text-blue-400">Flow</span>
+          </span>
+
+          {/* Close button – mobile only */}
+          <button
+            className="ml-auto rounded-lg p-1.5 text-slate-400 hover:bg-white/10 hover:text-white lg:hidden"
+            onClick={() => setSidebarOpen(false)}
+            aria-label="Close sidebar"
+          >
+            <X size={20} />
+          </button>
+        </div>
+
+        {/* Navigation */}
+        <nav className="mt-6 flex-1 space-y-1 px-3">
+          {navItems
+            .filter((item) => item.roles ? item.roles.includes(user?.role || '') : !item.hideForRoles?.includes(user?.role || ''))
+            .map((item) => (
+              <NavLink
+                key={item.path}
+                to={item.path}
+                end={item.path === '/'}
+                onClick={() => setSidebarOpen(false)}
+                className={({ isActive }) =>
+                  `${linkBase} ${isActive ? linkActive : linkInactive}`
+                }
+              >
+                {item.icon}
+                {item.label}
+              </NavLink>
+          ))}
+        </nav>
+
+        {/* Sidebar footer */}
+        <div className="border-t border-white/[0.06] p-4">
+          <div className="flex items-center gap-3 rounded-xl bg-white/[0.04] px-3 py-2.5">
+            <div className="h-8 w-8 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 shadow-md" />
+            <div className="flex-1 min-w-0">
+              <p className="truncate text-sm font-medium text-slate-200">
+                {user ? `\${user.firstName} \${user.lastName}` : 'User'}
+              </p>
+              <p className="truncate text-xs text-slate-500">{user?.role || 'Staff'}</p>
+            </div>
+            <ChevronDown size={16} className="text-slate-500" />
+          </div>
+        </div>
+      </aside>
+
+      {/* ── Main column ──────────────────────────────────────────────── */}
+      <div className="flex flex-1 flex-col overflow-hidden">
+        {/* Header */}
+        <header className="flex h-16 shrink-0 items-center justify-between border-b border-white/[0.06] bg-slate-900/60 px-4 backdrop-blur-xl sm:px-6">
+          {/* Mobile menu toggle */}
+          <button
+            className="rounded-lg p-2 text-slate-400 hover:bg-white/10 hover:text-white lg:hidden"
+            onClick={() => setSidebarOpen(true)}
+            aria-label="Open sidebar"
+          >
+            <Menu size={20} />
+          </button>
+
+          {/* Page title area — can be made dynamic via context / props */}
+          <div className="hidden lg:block">
+            <h2 className="text-sm font-semibold text-slate-200">
+              Welcome back 👋
+            </h2>
+          </div>
+
+          {/* Right-side actions */}
+          <div className="flex items-center gap-3">
+            {/* Notifications */}
+            <NotificationBell />
+
+            {/* Avatar */}
+            <button className="flex items-center gap-2 rounded-xl px-2 py-1.5 transition hover:bg-white/10">
+              <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 shadow-md" />
+              <ChevronDown size={14} className="text-slate-500" />
+            </button>
+          </div>
+        </header>
+
+        {/* Page content */}
+        <main className="flex-1 overflow-y-auto bg-slate-950 p-4 sm:p-6 lg:p-8">
+          <div className="mx-auto max-w-7xl">
+            <Outlet />
+          </div>
+        </main>
+      </div>
+      <LiveChatWidget />
+    </div>
+  );
+};
+
+export default Layout;
