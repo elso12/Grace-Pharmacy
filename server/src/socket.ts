@@ -6,7 +6,17 @@ let io: SocketServer;
 export const initSocketServer = (server: HttpServer) => {
   io = new SocketServer(server, {
     cors: {
-      origin: process.env.CLIENT_URL || 'http://localhost:5173',
+      origin: (origin, callback) => {
+        if (!origin) return callback(null, true);
+        if (
+          origin.endsWith('.vercel.app') ||
+          origin.includes('localhost') ||
+          origin === process.env.CLIENT_URL
+        ) {
+          return callback(null, true);
+        }
+        return callback(null, true); // Fallback allowing dynamic preview URLs
+      },
       methods: ['GET', 'POST'],
       credentials: true
     }

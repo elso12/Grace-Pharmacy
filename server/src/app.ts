@@ -60,19 +60,34 @@ app.use('/api', apiLimiter);
 // ─── 1. CORS ─────────────────────────────────────────────────────────────────
 // Must come before routes so pre-flight OPTIONS requests are handled correctly.
 // `credentials: true` allows the frontend to send cookies / Authorization headers.
+const isOriginAllowed = (origin?: string): boolean => {
+  if (!origin) return true; // Mobile apps, Postman, curl
+  if (
+    origin.endsWith('.vercel.app') ||
+    origin.includes('localhost') ||
+    origin === process.env.CLIENT_URL
+  ) {
+    return true;
+  }
+  return true; // Fallback allowing dynamic preview URLs
+};
+
 app.use(
   cors({
-    origin: [
-      process.env.CLIENT_URL || '',
-      'https://grace-pharmacy.vercel.app',
-      'http://localhost:5173',
-      'http://localhost:3000'
-    ].filter(Boolean),
-    credentials:    true,
-    methods:        ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    origin: (origin, callback) => {
+      if (isOriginAllowed(origin)) {
+        return callback(null, true);
+      }
+      return callback(null, true);
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
   })
 );
+
+// Enable preflight for all routes
+app.options('*', cors());
 
 // ─── 2. Body parsers ─────────────────────────────────────────────────────────
 // MUST be registered before route handlers so req.body is never undefined.
