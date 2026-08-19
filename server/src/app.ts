@@ -62,10 +62,15 @@ app.use('/api', apiLimiter);
 // `credentials: true` allows the frontend to send cookies / Authorization headers.
 app.use(
   cors({
-    origin:         process.env.CLIENT_URL || 'http://localhost:5173',
+    origin: [
+      process.env.CLIENT_URL || '',
+      'https://grace-pharmacy.vercel.app',
+      'http://localhost:5173',
+      'http://localhost:3000'
+    ].filter(Boolean),
     credentials:    true,
     methods:        ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
   })
 );
 
