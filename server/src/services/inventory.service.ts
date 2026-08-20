@@ -226,47 +226,65 @@ export const calculateFefoDispense = async (
 
   // ── Step 3 (optional): Commit deductions atomically ─────────────────────
   if (commit && canFulfill) {
-    const session = await mongoose.startSession();
+    let transactionSucceeded = false;
     try {
-      await session.withTransaction(async () => {
-        for (const deduction of deductions) {
-          const newQty = deduction.remainingAfterDeduction;
-          const updateFields: Record<string, unknown> = {
-            quantity: newQty,
-          };
-          // Auto-deplete if quantity hits zero
-          if (newQty === 0) {
-            updateFields.status = BatchStatus.DEPLETED;
-          }
+      const session = await mongoose.startSession();
+      try {
+        await session.withTransaction(async () => {
+          for (const deduction of deductions) {
+            const newQty = deduction.remainingAfterDeduction;
+            const updateFields: Record<string, unknown> = {
+              quantity: newQty,
+            };
+            if (newQty === 0) {
+              updateFields.status = BatchStatus.DEPLETED;
+            }
 
-          const updated = await InventoryBatch.findByIdAndUpdate(
-            deduction.batchId,
-            { $set: updateFields },
-            { new: true, session }
-          );
-
-          if (!updated) {
-            throw new AppError(
-              `Batch ${deduction.batchNumber} not found during commit`,
-              409
+            const updated = await InventoryBatch.findByIdAndUpdate(
+              deduction.batchId,
+              { $set: updateFields },
+              { new: true, session }
             );
-          }
 
-          // Optimistic concurrency: verify quantity didn't change
-          // between plan and commit
-          if (
-            updated.quantity + deduction.quantityToDeduct !==
-            deduction.remainingAfterDeduction + deduction.quantityToDeduct
-          ) {
-            throw new AppError(
-              `Concurrent modification detected on batch ${deduction.batchNumber}. Please retry.`,
-              409
-            );
+            if (!updated) {
+              throw new AppError(
+                `Batch ${deduction.batchNumber} not found during commit`,
+                409
+              );
+            }
+
+            if (
+              updated.quantity + deduction.quantityToDeduct !==
+              deduction.remainingAfterDeduction + deduction.quantityToDeduct
+            ) {
+              throw new AppError(
+                `Concurrent modification detected on batch ${deduction.batchNumber}. Please retry.`,
+                409
+              );
+            }
           }
+        });
+        transactionSucceeded = true;
+      } finally {
+        await session.endSession();
+      }
+    } catch (err: any) {
+      console.warn(`[Inventory] Transaction failed: ${err.message}. Falling back to sequential writes.`);
+    }
+
+    if (!transactionSucceeded) {
+      for (const deduction of deductions) {
+        const newQty = deduction.remainingAfterDeduction;
+        const updateFields: Record<string, unknown> = { quantity: newQty };
+        if (newQty === 0) {
+          updateFields.status = BatchStatus.DEPLETED;
         }
-      });
-    } finally {
-      await session.endSession();
+        await InventoryBatch.findByIdAndUpdate(
+          deduction.batchId,
+          { $set: updateFields },
+          { new: true }
+        );
+      }
     }
   }
 

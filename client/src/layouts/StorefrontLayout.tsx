@@ -1,6 +1,6 @@
 import React from 'react';
 import { Outlet, Link, useNavigate } from 'react-router-dom';
-import { Search, ShoppingCart, User, Pill, Activity, Baby, Heart, LogOut, LayoutDashboard, Package } from 'lucide-react';
+import { Search, ShoppingCart, User, Pill, Activity, Baby, Heart, LayoutDashboard, Package } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import NotificationBell from '../components/NotificationBell';
@@ -20,13 +20,8 @@ const STAFF_ROLES = new Set(['ADMIN', 'PHARMACIST', 'TECHNICIAN', 'CASHIER']);
 
 const StorefrontLayout: React.FC = () => {
   const { itemCount }                      = useCart();
-  const { isAuthenticated, user, logout }  = useAuth();
+  const { isAuthenticated, user }          = useAuth();
   const navigate                           = useNavigate();
-
-  const handleLogout = () => {
-    logout();
-    navigate('/', { replace: true });
-  };
 
   const adminHref = STAFF_ROLES.has(user?.role ?? '') ? '/admin/dashboard' : null;
 

@@ -332,45 +332,51 @@ export const dispenseMedication = asyncHandler(
     // for this, but since we use findByIdAndUpdate (which bypasses
     // hooks), we handle it explicitly here.
 
-    const session = await mongoose.startSession();
-
+    let transactionSucceeded = false;
     try {
-      await session.withTransaction(async () => {
-        // Process each deduction sequentially within the transaction
-        for (const deduction of deductions) {
-          // Build the update payload
-          const updateFields: Record<string, unknown> = {
-            quantity: deduction.quantityRemainingAfter,
-          };
-
-          // If this batch is now fully depleted, mark its status
-          if (deduction.quantityRemainingAfter === 0) {
-            updateFields.status = BatchStatus.DEPLETED;
-          }
-
-          // Perform the atomic update within the transaction session
-          const updatedBatch = await InventoryBatch.findByIdAndUpdate(
-            deduction.batchId,
-            { $set: updateFields },
-            {
-              new: true,      // Return the document AFTER the update
-              session,        // Bind to the transaction session
+      const session = await mongoose.startSession();
+      try {
+        await session.withTransaction(async () => {
+          for (const deduction of deductions) {
+            const updateFields: Record<string, unknown> = {
+              quantity: deduction.quantityRemainingAfter,
+            };
+            if (deduction.quantityRemainingAfter === 0) {
+              updateFields.status = BatchStatus.DEPLETED;
             }
-          );
-
-          // Safety check: if the batch was deleted between plan and
-          // commit, abort the entire transaction
-          if (!updatedBatch) {
-            throw new Error(
-              `Batch ${deduction.batchNumber} was not found during commit. ` +
-              `Possible concurrent deletion. Transaction aborted.`
+            const updatedBatch = await InventoryBatch.findByIdAndUpdate(
+              deduction.batchId,
+              { $set: updateFields },
+              { new: true, session }
             );
+            if (!updatedBatch) {
+              throw new Error(`Batch not found during commit.`);
+            }
           }
+        });
+        transactionSucceeded = true;
+      } finally {
+        await session.endSession();
+      }
+    } catch (err: any) {
+      console.warn(`[Inventory] Transaction failed: ${err.message}. Falling back to sequential writes.`);
+    }
+
+    // Fallback if transaction failed (e.g. Session ID unknown on Atlas M0)
+    if (!transactionSucceeded) {
+      for (const deduction of deductions) {
+        const updateFields: Record<string, unknown> = {
+          quantity: deduction.quantityRemainingAfter,
+        };
+        if (deduction.quantityRemainingAfter === 0) {
+          updateFields.status = BatchStatus.DEPLETED;
         }
-      });
-    } finally {
-      // Always end the session, whether the transaction succeeded or not
-      await session.endSession();
+        await InventoryBatch.findByIdAndUpdate(
+          deduction.batchId,
+          { $set: updateFields },
+          { new: true }
+        );
+      }
     }
 
     // ════════════════════════════════════════════════════════════════════

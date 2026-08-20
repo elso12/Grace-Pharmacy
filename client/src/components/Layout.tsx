@@ -6,7 +6,6 @@ import {
   Package,
   Menu,
   X,
-  ChevronDown,
   Pill,
   Users,
   ActivitySquare,

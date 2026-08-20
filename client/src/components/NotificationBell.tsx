@@ -8,7 +8,9 @@ const NotificationBell: React.FC = () => {
 
   useEffect(() => {
     // In a real app, you'd fetch initial notifications from REST, then listen for new ones
-    const socket: Socket = io((import.meta.env.VITE_API_URL || 'https://grace-pharmacy.onrender.com/api').replace('/api', ''));
+    const socket: Socket = io((import.meta.env.VITE_API_URL || 'https://grace-pharmacy.onrender.com/api').replace('/api', ''), {
+      transports: ['websocket'],
+    });
 
     socket.on('notification_push', (data: any) => {
       setNotifications(prev => [{
