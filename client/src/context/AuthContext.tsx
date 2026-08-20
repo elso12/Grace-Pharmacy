@@ -138,8 +138,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const logout = useCallback((): void => {
     clear();
-    // Redirect happens in the caller (page) or via ProtectedRoute — the
-    // context does not import useNavigate to keep it router-agnostic.
+    // Explicitly clear the default Authorization header
+    delete api.defaults.headers.common['Authorization'];
+    // Immediately redirect the user
+    window.location.href = '/login';
   }, []);
 
   // Keep the ref current so the interceptor always calls the latest version.

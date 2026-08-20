@@ -14,7 +14,7 @@ const LiveChatWidget: React.FC = () => {
   useEffect(() => {
     // Connect to WebSocket server when widget opens
     if (isOpen && !socketRef.current) {
-      socketRef.current = io(import.meta.env.VITE_API_URL || 'http://localhost:5000', {
+      socketRef.current = io((import.meta.env.VITE_API_URL || 'https://grace-pharmacy.onrender.com/api').replace('/api', ''), {
         withCredentials: true
       });
 

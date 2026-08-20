@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import NotificationBell from './NotificationBell';
 import LiveChatWidget from './LiveChatWidget';
+import UserProfileMenu from './common/UserProfileMenu';
 
 import { useAuth } from '../context/AuthContext';
 
@@ -118,14 +119,7 @@ const Layout: React.FC = () => {
         {/* Sidebar footer */}
         <div className="border-t border-white/[0.06] p-4">
           <div className="flex items-center gap-3 rounded-xl bg-white/[0.04] px-3 py-2.5">
-            <div className="h-8 w-8 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 shadow-md" />
-            <div className="flex-1 min-w-0">
-              <p className="truncate text-sm font-medium text-slate-200">
-                {user ? `\${user.firstName} \${user.lastName}` : 'User'}
-              </p>
-              <p className="truncate text-xs text-slate-500">{user?.role || 'Staff'}</p>
-            </div>
-            <ChevronDown size={16} className="text-slate-500" />
+            <UserProfileMenu />
           </div>
         </div>
       </aside>
@@ -156,10 +150,7 @@ const Layout: React.FC = () => {
             <NotificationBell />
 
             {/* Avatar */}
-            <button className="flex items-center gap-2 rounded-xl px-2 py-1.5 transition hover:bg-white/10">
-              <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 shadow-md" />
-              <ChevronDown size={14} className="text-slate-500" />
-            </button>
+            <UserProfileMenu />
           </div>
         </header>
 

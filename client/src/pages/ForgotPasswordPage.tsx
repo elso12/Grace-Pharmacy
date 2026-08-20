@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import api from '../services/api';
 
 const ForgotPasswordPage: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -11,11 +12,14 @@ const ForgotPasswordPage: React.FC = () => {
     e.preventDefault();
     setLoading(true);
     
-    // Simulating API call
-    setTimeout(() => {
-      setMessage('If an account exists, a reset link has been sent to your email.');
+    try {
+      const response = await api.post('/auth/forgot-password', { email });
+      setMessage(response.data.message || 'If an account exists, a reset link has been sent to your email.');
+    } catch (err: any) {
+      setMessage(err.response?.data?.message || 'An error occurred. Please try again.');
+    } finally {
       setLoading(false);
-    }, 1500);
+    }
   };
 
   return (

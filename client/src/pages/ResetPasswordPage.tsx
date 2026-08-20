@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import api from '../services/api';
 
 const ResetPasswordPage: React.FC = () => {
+  const [searchParams] = useSearchParams();
+  const token = searchParams.get('token');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -14,14 +17,22 @@ const ResetPasswordPage: React.FC = () => {
       setMessage('Passwords do not match.');
       return;
     }
+    if (!token) {
+      setMessage('Reset token is missing or invalid.');
+      return;
+    }
+
     setLoading(true);
     
-    // Simulating API call
-    setTimeout(() => {
-      setMessage('Password successfully reset! You can now log in.');
-      setLoading(false);
+    try {
+      const response = await api.post('/auth/reset-password', { token, newPassword: password });
+      setMessage(response.data.message || 'Password successfully reset! You can now log in.');
       setTimeout(() => navigate('/login'), 2000);
-    }, 1500);
+    } catch (err: any) {
+      setMessage(err.response?.data?.message || 'Failed to reset password. The link might be expired.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
