@@ -68,9 +68,13 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    if (error.response && error.response.status === 401) {
       console.warn('[api] 401 Unauthorized — token may be expired or invalid.');
-      // AuthContext's interceptor will call logout() to clear state.
+      localStorage.removeItem('grace_pharmacy_token');
+      localStorage.removeItem('grace_pharmacy_user');
+      if (window.location.pathname !== '/login') {
+        window.location.href = '/login?expired=true';
+      }
     }
 
     if (error.response?.status === 403) {

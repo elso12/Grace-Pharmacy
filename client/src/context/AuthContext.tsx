@@ -160,6 +160,19 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     if (storedToken && storedUser) {
       try {
         const parsedUser = JSON.parse(storedUser) as AuthUser;
+        
+        // Decode token to check expiration
+        const tokenParts = storedToken.split('.');
+        if (tokenParts.length === 3) {
+          const payload = JSON.parse(atob(tokenParts[1]));
+          if (payload.exp && Date.now() >= payload.exp * 1000) {
+            console.warn('[AuthContext] Token expired on load — clearing localStorage.');
+            clear();
+            setLoading(false);
+            return;
+          }
+        }
+        
         setToken(storedToken);
         setUser(parsedUser);
         // ✅ setLoading(false) called after successful hydration.

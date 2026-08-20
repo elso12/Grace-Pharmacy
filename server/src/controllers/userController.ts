@@ -17,6 +17,38 @@ export const getUsers = asyncHandler(async (req: Request, res: Response) => {
 });
 
 /**
+ * @desc    Create a new staff user
+ * @route   POST /api/users
+ * @access  Private (ADMIN)
+ */
+export const createUser = asyncHandler(async (req: Request, res: Response) => {
+  const { firstName, lastName, email, password, role, phone } = req.body;
+  
+  const existingUser = await User.findOne({ email });
+  if (existingUser) {
+    throw new AppError('Email is already in use', 400);
+  }
+
+  const user = await User.create({
+    firstName,
+    lastName,
+    email,
+    password,
+    role,
+    phone,
+    isActive: true
+  });
+
+  const newUser = user.toObject();
+  delete (newUser as any).password;
+
+  res.status(201).json({
+    status: 'success',
+    data: { user: newUser }
+  });
+});
+
+/**
  * @desc    Get a single user by ID
  * @route   GET /api/users/:id
  * @access  Private (ADMIN)

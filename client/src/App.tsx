@@ -21,6 +21,7 @@ import PatientPortal from './pages/Customer/PatientPortal';
 
 import AdminDashboard from './pages/Admin/AdminDashboard';
 import InventoryFEFOPage from './pages/Admin/InventoryFEFOPage';
+import ProductsPage from './pages/Admin/ProductsPage';
 import PharmacistQueue from './pages/Admin/PharmacistQueue';
 import PharmacistDashboard from './pages/Admin/PharmacistDashboard';
 import UsersPage from './pages/Admin/UsersPage';
@@ -83,6 +84,7 @@ const App: React.FC = () => (
               <Route element={<ProtectedRoute allowedRoles={['ADMIN']} />}>
                 <Route index                element={<AdminDashboard />} />
                 <Route path="dashboard"     element={<AdminDashboard />} />
+                <Route path="products"      element={<ProductsPage />} />
                 <Route path="inventory"     element={<InventoryFEFOPage />} />
                 <Route path="users"         element={<UsersPage />} />
                 <Route path="audit"         element={<AuditLogPage />} />

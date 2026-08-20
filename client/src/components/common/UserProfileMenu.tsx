@@ -81,6 +81,16 @@ const UserProfileMenu: React.FC = () => {
               </span>
             </div>
           </div>
+          
+          <div className="py-1">
+            <a
+              href="/admin/dashboard"
+              className="group flex w-full items-center gap-2 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
+            >
+              My Dashboard
+            </a>
+          </div>
+          
           <div className="py-1">
             <button
               onClick={() => {

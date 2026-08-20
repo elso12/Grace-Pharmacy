@@ -18,6 +18,8 @@ export interface IProduct extends Document {
   unit: string;
   requiresPrescription: boolean;
   reorderLevel: number;
+  unitPrice: number;
+  imageUrl?: string;
   isActive: boolean;
   shelfLocation?: {
     aisle?: string;
@@ -110,6 +112,16 @@ const productSchema = new Schema<IProduct>(
       required: [true, 'Reorder level is required'],
       min: [0, 'Reorder level cannot be negative'],
       default: 10,
+    },
+    unitPrice: {
+      type: Number,
+      required: [true, 'Unit price is required'],
+      min: [0, 'Unit price cannot be negative'],
+      default: 0,
+    },
+    imageUrl: {
+      type: String,
+      trim: true,
     },
     isActive: {
       type: Boolean,

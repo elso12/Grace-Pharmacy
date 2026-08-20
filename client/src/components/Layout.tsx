@@ -39,6 +39,7 @@ const navItems: NavItem[] = [
   { path: '/admin/pick-list', label: 'Pick List Queue', icon: <FileCheck size={20} />, roles: ['ADMIN', 'PHARMACIST', 'TECHNICIAN'] },
   { path: '/admin/shelf-directory', label: 'Shelf Directory', icon: <Archive size={20} />, roles: ['ADMIN', 'PHARMACIST', 'TECHNICIAN'] },
   { path: '/admin/cycle-count', label: 'Cycle Count', icon: <FileBarChart size={20} />, roles: ['ADMIN', 'PHARMACIST', 'TECHNICIAN'] },
+  { path: '/admin/products', label: 'Medications', icon: <Pill size={20} />, roles: ['ADMIN', 'PHARMACIST'] },
   { path: '/admin/inventory', label: 'Inventory', icon: <Package size={20} />, roles: ['ADMIN', 'PHARMACIST'] },
   { path: '/admin/reports', label: 'Reports', icon: <TrendingUp size={20} />, roles: ['ADMIN'] },
   { path: '/admin/users', label: 'Users & Roles', icon: <Users size={20} />, roles: ['ADMIN'] },

@@ -15,11 +15,8 @@ authRouter.get("/", (_req, res) => {
 });
 
 
-// ─── Product Routes ─────────────────────────────────────────────────────────
-export const productRouter = Router();
-productRouter.get("/", (_req, res) => {
-  res.json({ message: "Product routes — coming soon" });
-});
+import productRoutes from "./productRoutes";
+export const productRouter = productRoutes;
 
 // ─── Inventory Routes (FULLY IMPLEMENTED) ───────────────────────────────────
 export const inventoryRouter = inventoryRoutes;

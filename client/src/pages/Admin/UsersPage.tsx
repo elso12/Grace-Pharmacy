@@ -21,6 +21,19 @@ const UsersPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [error, setError] = useState<string | null>(null);
 
+  // Modal State
+  const [isAddUserModalOpen, setAddUserModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  const [newUser, setNewUser] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    password: '',
+    role: 'PHARMACIST',
+    phone: ''
+  });
+
   const fetchUsers = async () => {
     try {
       setLoading(true);
@@ -56,6 +69,22 @@ const UsersPage: React.FC = () => {
     }
   };
 
+  const handleAddUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      setIsSubmitting(true);
+      await api.post('/users', newUser);
+      setAddUserModalOpen(false);
+      setNewUser({ firstName: '', lastName: '', email: '', password: '', role: 'PHARMACIST', phone: '' });
+      fetchUsers();
+    } catch (err: any) {
+      console.error('Failed to add user', err);
+      alert(err.response?.data?.message || 'Failed to create staff member.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const filteredUsers = users.filter(u => 
     u.firstName.toLowerCase().includes(searchTerm.toLowerCase()) || 
     u.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -76,8 +105,8 @@ const UsersPage: React.FC = () => {
           </p>
         </div>
         <button 
+          onClick={() => setAddUserModalOpen(true)}
           className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold rounded-xl shadow-lg shadow-blue-500/25 transition-all"
-          onClick={() => alert('Adding new staff members is not fully implemented in this demo.')}
         >
           <UserPlus className="h-4 w-4" />
           Add Staff
@@ -171,6 +200,57 @@ const UsersPage: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* ── Add Staff Modal ──────────────────────────────────────────────── */}
+      {isAddUserModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-sm">
+          <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-md shadow-2xl p-6">
+            <h2 className="text-xl font-bold text-white mb-6">Add New Staff Member</h2>
+            <form onSubmit={handleAddUser} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-400 mb-1">First Name *</label>
+                  <input required type="text" value={newUser.firstName} onChange={e => setNewUser({...newUser, firstName: e.target.value})} className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2 text-white outline-none focus:border-blue-500" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-400 mb-1">Last Name *</label>
+                  <input required type="text" value={newUser.lastName} onChange={e => setNewUser({...newUser, lastName: e.target.value})} className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2 text-white outline-none focus:border-blue-500" />
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-slate-400 mb-1">Email Address *</label>
+                <input required type="email" value={newUser.email} onChange={e => setNewUser({...newUser, email: e.target.value})} className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2 text-white outline-none focus:border-blue-500" />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-400 mb-1">Temporary Password *</label>
+                <input required type="password" value={newUser.password} onChange={e => setNewUser({...newUser, password: e.target.value})} className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2 text-white outline-none focus:border-blue-500" />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-400 mb-1">Role *</label>
+                <select value={newUser.role} onChange={e => setNewUser({...newUser, role: e.target.value})} className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2 text-white outline-none focus:border-blue-500 [color-scheme:dark]">
+                  <option value="ADMIN">Administrator</option>
+                  <option value="PHARMACIST">Pharmacist</option>
+                  <option value="TECHNICIAN">Pharmacy Technician</option>
+                  <option value="CASHIER">Cashier</option>
+                </select>
+              </div>
+
+              <div className="pt-4 flex justify-end gap-3 border-t border-slate-800 mt-2">
+                <button type="button" onClick={() => setAddUserModalOpen(false)} className="px-4 py-2 rounded-xl text-sm font-semibold text-slate-300 hover:bg-slate-800 transition-colors">
+                  Cancel
+                </button>
+                <button type="submit" disabled={isSubmitting} className="px-4 py-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm font-semibold rounded-xl shadow-lg transition-all">
+                  {isSubmitting ? 'Creating...' : 'Create Account'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };

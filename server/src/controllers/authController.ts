@@ -25,7 +25,7 @@ import User, { type IUser } from "../models/User.model";
 import { UserRole } from "../types/enums";
 
 // ─── Constants ───────────────────────────────────────────────────────────────
-const JWT_EXPIRES_IN = "7d";
+const JWT_EXPIRES_IN = "8h";
 
 /** Minimum password length — mirrors the User model's minlength constraint. */
 const PASSWORD_MIN_LENGTH = 8;
