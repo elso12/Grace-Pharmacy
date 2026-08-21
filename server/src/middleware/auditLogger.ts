@@ -18,25 +18,19 @@ export const auditLogger = (req: Request, res: Response, next: NextFunction) => 
           // Attempt to determine entity type from route
           const routePath = req.baseUrl || req.path;
           const entityParts = routePath.split('/').filter(p => p && p !== 'api');
-          const entityType = entityParts.length > 0 ? entityParts[0].toUpperCase() : 'UNKNOWN';
+          const targetEntity = entityParts.length > 0 ? entityParts[0].toUpperCase() : 'UNKNOWN';
 
           // Sanitize body (remove passwords)
-          const newState = { ...req.body };
-          if (newState.password) delete newState.password;
-          
-          let entityId = null;
-          if (req.params.id && mongoose.Types.ObjectId.isValid(req.params.id)) {
-             entityId = new mongoose.Types.ObjectId(req.params.id);
-          } else {
-             entityId = new mongoose.Types.ObjectId(); // Fallback to satisfy required constraint
-          }
+          const details = { ...req.body };
+          if (details.password) delete details.password;
 
           await AuditLog.create({
+            actorId: user?.id,
+            actorName: user ? `${user.firstName} ${user.lastName}` : 'System',
+            actorRole: user?.role || 'SYSTEM',
             action,
-            entityType,
-            entityId,
-            performedBy: user?.id,
-            newState,
+            targetEntity,
+            details,
             ipAddress: req.ip,
             timestamp: new Date(),
           });

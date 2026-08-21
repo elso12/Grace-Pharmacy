@@ -9,7 +9,13 @@ import mongoose from 'mongoose';
  * @access  Private (ADMIN)
  */
 export const getUsers = asyncHandler(async (req: Request, res: Response) => {
-  const users = await User.find({ role: { $ne: 'CUSTOMER' } }).select('-password');
+  const { role, status } = req.query;
+  const filter: any = { role: { $ne: 'CUSTOMER' } };
+  
+  if (role) filter.role = role;
+  if (status) filter.isActive = status === 'active';
+
+  const users = await User.find(filter).select('-password');
   res.status(200).json({
     status: 'success',
     data: { users }
@@ -130,5 +136,30 @@ export const toggleUserStatus = asyncHandler(async (req: Request, res: Response)
   res.status(200).json({
     status: 'success',
     data: { user: updatedUser }
+  });
+});
+
+/**
+ * @desc    Reset user password
+ * @route   POST /api/users/:id/reset-password
+ * @access  Private (ADMIN)
+ */
+export const resetPassword = asyncHandler(async (req: Request, res: Response) => {
+  const { password } = req.body;
+  if (!password || password.length < 6) {
+    throw new AppError('Please provide a valid password (min 6 characters)', 400);
+  }
+
+  const user = await User.findById(req.params.id);
+  if (!user) {
+    throw new AppError('User not found', 404);
+  }
+
+  user.password = password; // Pre-save hook will hash this
+  await user.save();
+
+  res.status(200).json({
+    status: 'success',
+    message: 'Password reset successfully'
   });
 });

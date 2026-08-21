@@ -6,45 +6,48 @@ export enum AuditAction {
   DELETE = 'DELETE',
   DISPENSE = 'DISPENSE',
   PRICE_CHANGE = 'PRICE_CHANGE',
+  USER_CREATED = 'USER_CREATED',
+  ROLE_CHANGED = 'ROLE_CHANGED',
+  STOCK_ADJUSTMENT = 'STOCK_ADJUSTMENT',
+  ORDER_CANCELLED = 'ORDER_CANCELLED',
 }
 
 export interface IAuditLog extends Document {
-  action: AuditAction;
-  entityType: string;
-  entityId: Types.ObjectId;
-  performedBy?: Types.ObjectId;
-  previousState?: any;
-  newState?: any;
+  actorId?: Types.ObjectId;
+  actorName: string;
+  actorRole: string;
+  action: string;
+  targetEntity: string;
+  details?: any;
   ipAddress?: string;
   timestamp: Date;
 }
 
 const auditLogSchema = new Schema<IAuditLog>(
   {
-    action: {
-      type: String,
-      enum: Object.values(AuditAction),
-      required: true,
-    },
-    entityType: {
-      type: String,
-      required: true,
-      index: true,
-    },
-    entityId: {
-      type: Schema.Types.ObjectId,
-      required: true,
-      index: true,
-    },
-    performedBy: {
+    actorId: {
       type: Schema.Types.ObjectId,
       ref: 'User',
       index: true,
     },
-    previousState: {
-      type: Schema.Types.Mixed,
+    actorName: {
+      type: String,
+      required: true,
     },
-    newState: {
+    actorRole: {
+      type: String,
+      required: true,
+    },
+    action: {
+      type: String,
+      required: true,
+    },
+    targetEntity: {
+      type: String,
+      required: true,
+      index: true,
+    },
+    details: {
       type: Schema.Types.Mixed,
     },
     ipAddress: {
@@ -57,9 +60,7 @@ const auditLogSchema = new Schema<IAuditLog>(
     },
   },
   {
-    // Capped collections or time-series could be used here for true immutability,
-    // but a standard collection with no update/delete routes serves as a basic audit log.
-    timestamps: false, // We use timestamp manually
+    timestamps: false,
   }
 );
 

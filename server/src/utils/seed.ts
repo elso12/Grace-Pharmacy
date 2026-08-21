@@ -288,6 +288,87 @@ async function seed() {
     const batchResult = await db.collection('inventorybatches').insertMany(batches);
     console.log(` Created ${batchResult.insertedCount} FEFO inventory batches.\n`);
 
+    // 7. Seed Sales Data (For Analytics/Reports)
+    console.log('Seeding Sales Data...');
+    const sales = [];
+    const statuses = ['COMPLETED', 'COMPLETED', 'COMPLETED', 'REFUNDED'];
+    const paymentMethods = ['CASH', 'CREDIT_CARD', 'MOBILE_MONEY'];
+    
+    for (let i = 0; i < 35; i++) {
+      const saleDate = new Date();
+      saleDate.setDate(saleDate.getDate() - Math.floor(Math.random() * 30)); // random date in last 30 days
+      const isCard = Math.random() > 0.5;
+      const subtotal = Math.floor(Math.random() * 200) + 20;
+      const tax = subtotal * 0.05;
+      
+      sales.push({
+        invoiceNumber: `INV-${10000 + i}`,
+        items: [
+          {
+            product: productIds[0],
+            batchId: Object.values(batchResult.insertedIds)[0],
+            productName: 'Amoxicillin 500mg',
+            quantity: 2,
+            unitPrice: 18.5,
+            discount: 0,
+            lineTotal: 37,
+            requiresPrescription: true
+          }
+        ],
+        subtotal: subtotal,
+        taxRate: 5,
+        taxAmount: tax,
+        discountTotal: 0,
+        totalAmount: subtotal + tax,
+        paymentMethod: paymentMethods[Math.floor(Math.random() * paymentMethods.length)],
+        amountPaid: subtotal + tax,
+        changeGiven: 0,
+        status: statuses[Math.floor(Math.random() * statuses.length)],
+        dispensedBy: Object.values(userResult.insertedIds)[1], // Pharmacist
+        createdAt: saleDate,
+        updatedAt: saleDate,
+      });
+    }
+    const saleResult = await db.collection('sales').insertMany(sales);
+    console.log(` Created ${saleResult.insertedCount} sales transactions.\n`);
+
+    // 8. Seed Audit Logs
+    console.log('Seeding Audit Logs...');
+    const auditLogs = [
+      {
+        actorId: Object.values(userResult.insertedIds)[0],
+        actorName: 'Dr. Sarah Jenkins',
+        actorRole: 'ADMIN',
+        action: 'UPDATE',
+        targetEntity: 'Product: Amoxicillin 500mg',
+        details: { field: 'price', old: 17.5, new: 18.5 },
+        ipAddress: '192.168.1.45',
+        timestamp: getFutureDate(-0.5) // half month ago
+      },
+      {
+        actorId: Object.values(userResult.insertedIds)[1],
+        actorName: 'Marcus Vance, PharmD',
+        actorRole: 'PHARMACIST',
+        action: 'DISPENSE',
+        targetEntity: 'Sale: INV-10005',
+        details: { items: 2, amount: 45.5 },
+        ipAddress: '192.168.1.50',
+        timestamp: getFutureDate(-0.2)
+      },
+      {
+        actorId: Object.values(userResult.insertedIds)[0],
+        actorName: 'Dr. Sarah Jenkins',
+        actorRole: 'ADMIN',
+        action: 'USER_CREATED',
+        targetEntity: 'User: Elena Gomez',
+        details: { role: 'CASHIER' },
+        ipAddress: '192.168.1.45',
+        timestamp: getFutureDate(-1)
+      }
+    ];
+    const auditResult = await db.collection('auditlogs').insertMany(auditLogs);
+    console.log(` Created ${auditResult.insertedCount} audit log entries.\n`);
+
     console.log('──────────────────────────────────────────────────────────');
     console.log('✅ Database Seeding Completed Successfully!');
     console.log('──────────────────────────────────────────────────────────');

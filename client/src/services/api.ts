@@ -27,7 +27,7 @@ import { LS_TOKEN } from '../context/AuthContext';
 // ── Base URL ──────────────────────────────────────────────────────────────────
 // Falls back to the local server when VITE_API_BASE_URL is not set.
 const API_BASE_URL: string =
-  import.meta.env.VITE_API_URL || 'https://grace-pharmacy.onrender.com/api';
+  import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 // ── Axios instance ────────────────────────────────────────────────────────────
 const api: AxiosInstance = axios.create({

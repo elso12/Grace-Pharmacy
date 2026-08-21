@@ -70,6 +70,20 @@ const InventoryFEFOPage: React.FC = () => {
     }
   };
 
+  const handleQuarantine = async (batchId: string) => {
+    if (!window.confirm("Are you sure you want to quarantine this batch?")) return;
+    try {
+      setLoading(true);
+      const { quarantineBatch } = await import('../../services/inventoryApi');
+      await quarantineBatch(batchId);
+      fetchBatches();
+    } catch (err) {
+      console.error('Failed to quarantine batch:', err);
+      alert('Failed to quarantine batch.');
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchBatches();
   }, []);
@@ -182,8 +196,11 @@ const InventoryFEFOPage: React.FC = () => {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right">
-                      <button className="text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors">
-                        Edit
+                      <button 
+                        onClick={() => handleQuarantine(batch.id)}
+                        className="text-amber-500 hover:text-amber-400 text-sm font-medium transition-colors"
+                      >
+                        Quarantine
                       </button>
                     </td>
                   </tr>

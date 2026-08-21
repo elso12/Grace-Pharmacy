@@ -5,7 +5,7 @@ import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import NotificationBell from '../components/NotificationBell';
 import LiveChatWidget from '../components/LiveChatWidget';
-import UserProfileMenu from '../components/common/UserProfileMenu';
+import { UserProfileDropdown } from '../components/layout/UserProfileDropdown';
 
 // Category hrefs must match exact StorefrontCategory enum values used by the API
 const categories = [
@@ -99,7 +99,7 @@ const StorefrontLayout: React.FC = () => {
                     </Link>
                   )}
 
-                  <UserProfileMenu />
+                  <UserProfileDropdown />
                 </div>
               ) : (
                 /* ── Guest controls ─────────────────────────────────────── */

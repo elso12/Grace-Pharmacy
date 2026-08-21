@@ -145,7 +145,7 @@ app.use('/api/alerts',    ...strictAdminGuard, alertRoutes);
 app.use('/api/reports',   ...strictAdminGuard, reportRoutes);
 app.use('/api/analytics', ...strictAdminGuard, analyticsRoutes);
 app.use('/api/users',     ...strictAdminGuard, userRouter);
-app.use('/api/audit',     ...strictAdminGuard, auditRouter);
+app.use('/api/audit-logs',  ...strictAdminGuard, auditRouter);
 
 // ─── 5. Error Handling ───────────────────────────────────────────────────────
 // These MUST be registered last — Express identifies error middleware by arity=4.

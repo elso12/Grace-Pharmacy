@@ -14,10 +14,12 @@ import {
   FileBarChart,
   TrendingUp,
   Settings,
+  LogOut,
+  ShoppingBag,
 } from 'lucide-react';
 import NotificationBell from './NotificationBell';
 import LiveChatWidget from './LiveChatWidget';
-import UserProfileMenu from './common/UserProfileMenu';
+import { UserProfileDropdown } from './layout/UserProfileDropdown';
 
 import { useAuth } from '../context/AuthContext';
 
@@ -41,14 +43,23 @@ const navItems: NavItem[] = [
   { path: '/admin/products', label: 'Medications', icon: <Pill size={20} />, roles: ['ADMIN', 'PHARMACIST'] },
   { path: '/admin/inventory', label: 'Inventory', icon: <Package size={20} />, roles: ['ADMIN', 'PHARMACIST'] },
   { path: '/admin/reports', label: 'Reports', icon: <TrendingUp size={20} />, roles: ['ADMIN'] },
+  { path: '/admin/orders', label: 'Orders', icon: <ShoppingBag size={20} />, roles: ['ADMIN', 'PHARMACIST', 'TECHNICIAN'] },
   { path: '/admin/users', label: 'Users & Roles', icon: <Users size={20} />, roles: ['ADMIN'] },
   { path: '/admin/audit', label: 'Audit Logs', icon: <Settings size={20} />, roles: ['ADMIN'] },
 ];
 
 /* ── Layout ─────────────────────────────────────────────────────────── */
 const Layout: React.FC = () => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
+
+  const handleLogout = () => {
+    logout();
+  };
+
+  const initials = user?.firstName
+    ? (user.firstName[0] || '') + (user.lastName?.[0] || 'U')
+    : 'U';
 
   const linkBase =
     'flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200';
@@ -118,8 +129,24 @@ const Layout: React.FC = () => {
 
         {/* Sidebar footer */}
         <div className="border-t border-white/[0.06] p-4">
-          <div className="flex items-center gap-3 rounded-xl bg-white/[0.04] px-3 py-2.5">
-            <UserProfileMenu />
+          <div className="flex items-center gap-3 rounded-xl bg-white/[0.04] p-2 hover:bg-white/[0.08] transition-colors cursor-pointer group" onClick={handleLogout}>
+            <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-emerald-600 to-teal-500 text-white font-semibold flex items-center justify-center shrink-0">
+              {initials}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-slate-200 truncate">
+                {user?.firstName} {user?.lastName}
+              </p>
+              <p className="text-[10px] text-slate-500 capitalize truncate">
+                {user?.role.toLowerCase()}
+              </p>
+            </div>
+            <button 
+              className="p-2 rounded-lg text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+              title="Sign Out"
+            >
+              <LogOut size={18} />
+            </button>
           </div>
         </div>
       </aside>
@@ -127,7 +154,7 @@ const Layout: React.FC = () => {
       {/* ── Main column ──────────────────────────────────────────────── */}
       <div className="flex flex-1 flex-col overflow-hidden">
         {/* Header */}
-        <header className="flex h-16 shrink-0 items-center justify-between border-b border-white/[0.06] bg-slate-900/60 px-4 backdrop-blur-xl sm:px-6">
+        <header className="relative z-50 flex h-16 shrink-0 items-center justify-between border-b border-white/[0.06] bg-slate-900/60 px-4 backdrop-blur-xl sm:px-6">
           {/* Mobile menu toggle */}
           <button
             className="rounded-lg p-2 text-slate-400 hover:bg-white/10 hover:text-white lg:hidden"
@@ -150,7 +177,7 @@ const Layout: React.FC = () => {
             <NotificationBell />
 
             {/* Avatar */}
-            <UserProfileMenu />
+            <UserProfileDropdown />
           </div>
         </header>
 

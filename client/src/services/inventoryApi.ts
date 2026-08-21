@@ -11,10 +11,20 @@ export interface InventoryAlert {
 }
 
 export const getInventoryAlerts = async (): Promise<InventoryAlert[]> => {
-  // We assume the backend route is /api/inventory/alerts
-  // Wait, let's look at the backend routes to be sure. I'll just map it to what the user requested.
-  const { data } = await api.get('/inventory/alerts');
-  return data.data;
+  const { data } = await api.get('/inventory/alerts/expiry?days=365');
+  
+  const allBatches = [...(data.data.alreadyExpired || []), ...(data.data.expiringSoon || [])];
+
+  // Map backend ExpiryAlertBatchItem to InventoryAlert
+  return allBatches.map((batch: any) => ({
+    id: batch._id,
+    productId: batch.product._id,
+    productName: batch.product.name,
+    batchNumber: batch.batchNumber,
+    stockLevel: batch.quantity,
+    expiryDate: batch.expiryDate,
+    daysUntilExpiry: batch.daysUntilExpiry,
+  }));
 };
 
 export const addInventoryBatch = async (
@@ -23,13 +33,18 @@ export const addInventoryBatch = async (
   stock: number,
   expiryDate: string
 ): Promise<any> => {
-  const { data } = await api.post('/inventory/batch', {
+  const { data } = await api.post('/inventory/batches', {
     productId,
     batchNumber,
-    quantity: stock, // The backend addBatch expects `quantity` based on what we saw earlier
+    quantity: stock, 
     expiryDate,
     purchasePrice: 0,
     sellingPrice: 0,
   });
+  return data.data;
+};
+
+export const quarantineBatch = async (batchId: string): Promise<any> => {
+  const { data } = await api.patch(`/inventory/batches/${batchId}/quarantine`);
   return data.data;
 };

@@ -26,6 +26,8 @@ import PharmacistQueue from './pages/Admin/PharmacistQueue';
 import PharmacistDashboard from './pages/Admin/PharmacistDashboard';
 import UsersPage from './pages/Admin/UsersPage';
 import AuditLogPage from './pages/Admin/AuditLogPage';
+import ReportsPage from './pages/Admin/ReportsPage';
+import OrdersPage from './pages/Admin/OrdersPage';
 
 import PickListQueue from './pages/Technician/PickListQueue';
 import CycleCountForm from './pages/Technician/CycleCountForm';
@@ -87,7 +89,9 @@ const App: React.FC = () => (
                 <Route path="products"      element={<ProductsPage />} />
                 <Route path="inventory"     element={<InventoryFEFOPage />} />
                 <Route path="users"         element={<UsersPage />} />
+                <Route path="orders"        element={<OrdersPage />} />
                 <Route path="audit"         element={<AuditLogPage />} />
+                <Route path="reports"       element={<ReportsPage />} />
               </Route>
             </Route>
           </Route>

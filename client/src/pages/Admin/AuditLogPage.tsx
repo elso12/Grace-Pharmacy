@@ -1,20 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Activity, Filter, ShieldAlert } from 'lucide-react';
+import { Activity, Search, ShieldAlert } from 'lucide-react';
 import api from '../../services/api';
 
 interface AuditLog {
   _id: string;
   action: string;
-  entityType: string;
-  entityId: string;
-  performedBy: {
-    _id: string;
-    firstName: string;
-    lastName: string;
-    email: string;
-    role: string;
-  };
-  newState: any;
+  targetEntity: string;
+  actorId: string;
+  actorName: string;
+  actorRole: string;
+  details: any;
   ipAddress: string;
   timestamp: string;
 }
@@ -24,11 +19,18 @@ const AuditLogPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const [searchTerm, setSearchTerm] = useState('');
+  const [targetEntityFilter, setTargetEntityFilter] = useState('');
+
   const fetchLogs = async () => {
     try {
       setLoading(true);
       setError(null);
-      const { data } = await api.get('/audit?limit=100');
+      let query = '/audit-logs?limit=100';
+      if (searchTerm) query += `&search=${encodeURIComponent(searchTerm)}`;
+      if (targetEntityFilter) query += `&targetEntity=${encodeURIComponent(targetEntityFilter)}`;
+      
+      const { data } = await api.get(query);
       setLogs(data.data.logs);
     } catch (err) {
       console.error('Failed to fetch audit logs:', err);
@@ -40,7 +42,7 @@ const AuditLogPage: React.FC = () => {
 
   useEffect(() => {
     fetchLogs();
-  }, []);
+  }, [searchTerm, targetEntityFilter]);
 
   const getActionColor = (action: string) => {
     switch (action) {
@@ -71,9 +73,28 @@ const AuditLogPage: React.FC = () => {
         
         {/* Controls Bar */}
         <div className="p-4 border-b border-slate-800 flex items-center gap-4 bg-slate-900/50">
-          <div className="flex items-center gap-2 text-sm text-slate-400 px-2">
-            <Filter size={16} /> Filtering coming soon...
+          <div className="relative flex-1 max-w-md">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+            <input
+              type="text"
+              placeholder="Search by actor or entity..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 bg-slate-950 border border-slate-800 rounded-xl text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all"
+            />
           </div>
+          <select 
+            value={targetEntityFilter}
+            onChange={(e) => setTargetEntityFilter(e.target.value)}
+            className="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-sm text-slate-300 outline-none focus:border-blue-500 [color-scheme:dark]"
+          >
+            <option value="">All Entities</option>
+            <option value="User">User</option>
+            <option value="Sale">Sale</option>
+            <option value="Order">Order</option>
+            <option value="InventoryBatch">InventoryBatch</option>
+            <option value="Product">Product</option>
+          </select>
         </div>
 
         {/* Data Table */}
@@ -111,22 +132,21 @@ const AuditLogPage: React.FC = () => {
                         </span>
                       </td>
                       <td className="px-6 py-4">
-                        <div className="font-semibold text-slate-200">{log.entityType}</div>
-                        <div className="text-xs text-slate-500 font-mono">{log.entityId}</div>
+                        <div className="font-semibold text-slate-200">{log.targetEntity}</div>
                       </td>
                       <td className="px-6 py-4">
-                        {log.performedBy ? (
+                        {log.actorName ? (
                           <>
-                            <div className="font-medium text-slate-200">{log.performedBy.firstName} {log.performedBy.lastName}</div>
-                            <div className="text-xs text-slate-500">{log.performedBy.role}</div>
+                            <div className="font-medium text-slate-200">{log.actorName}</div>
+                            <div className="text-xs text-slate-500">{log.actorRole}</div>
                           </>
                         ) : (
                           <span className="text-slate-500 italic">System</span>
                         )}
                       </td>
                       <td className="px-6 py-4">
-                        <div className="max-w-xs truncate text-xs text-slate-400 font-mono bg-slate-950 px-2 py-1 rounded">
-                          {JSON.stringify(log.newState)}
+                        <div className="max-w-xs truncate text-xs text-slate-400 font-mono bg-slate-950 px-2 py-1 rounded" title={JSON.stringify(log.details, null, 2)}>
+                          {JSON.stringify(log.details)}
                         </div>
                       </td>
                     </tr>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, UserPlus, Search, ShieldAlert, CheckCircle2, XCircle } from 'lucide-react';
+import { Users, UserPlus, Search, ShieldAlert, CheckCircle2, XCircle, Key } from 'lucide-react';
 import api from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 
@@ -21,10 +21,18 @@ const UsersPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [error, setError] = useState<string | null>(null);
 
-  // Modal State
+  // Filters
+  const [filterRole, setFilterRole] = useState('');
+  const [filterStatus, setFilterStatus] = useState('');
+
+  // Modals
   const [isAddUserModalOpen, setAddUserModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
+  const [resetModalOpen, setResetModalOpen] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [newPassword, setNewPassword] = useState('');
+
   const [newUser, setNewUser] = useState({
     firstName: '',
     lastName: '',
@@ -38,7 +46,11 @@ const UsersPage: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      const { data } = await api.get('/users');
+      let query = '/users?';
+      if (filterRole) query += `role=${filterRole}&`;
+      if (filterStatus) query += `status=${filterStatus}&`;
+
+      const { data } = await api.get(query);
       setUsers(data.data.users);
     } catch (err) {
       console.error('Failed to fetch users:', err);
@@ -50,7 +62,7 @@ const UsersPage: React.FC = () => {
 
   useEffect(() => {
     fetchUsers();
-  }, []);
+  }, [filterRole, filterStatus]);
 
   const toggleStatus = async (id: string, currentStatus: boolean) => {
     if (id === currentUser?.id) {
@@ -66,6 +78,37 @@ const UsersPage: React.FC = () => {
     } catch (err) {
       console.error('Failed to toggle status:', err);
       alert('Failed to update user status.');
+    }
+  };
+
+  const changeRole = async (id: string, newRole: string) => {
+    if (id === currentUser?.id) {
+      alert("You cannot change your own role.");
+      return;
+    }
+    try {
+      await api.put(`/users/${id}`, { role: newRole });
+      setUsers(users.map(u => u.id === id ? { ...u, role: newRole } : u));
+    } catch (err) {
+      console.error('Failed to change role:', err);
+      alert('Failed to update user role.');
+    }
+  };
+
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedUserId) return;
+    try {
+      setIsSubmitting(true);
+      await api.post(`/users/${selectedUserId}/reset-password`, { password: newPassword });
+      setResetModalOpen(false);
+      setNewPassword('');
+      alert('Password reset successfully!');
+    } catch (err: any) {
+      console.error('Failed to reset password', err);
+      alert(err.response?.data?.message || 'Failed to reset password.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -128,10 +171,32 @@ const UsersPage: React.FC = () => {
               className="w-full pl-10 pr-4 py-2 bg-slate-950 border border-slate-800 rounded-xl text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition-all"
             />
           </div>
+          
+          <select 
+            value={filterRole} 
+            onChange={(e) => setFilterRole(e.target.value)}
+            className="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-sm text-slate-300 outline-none focus:border-blue-500 [color-scheme:dark]"
+          >
+            <option value="">All Roles</option>
+            <option value="ADMIN">Admin</option>
+            <option value="PHARMACIST">Pharmacist</option>
+            <option value="TECHNICIAN">Technician</option>
+            <option value="CASHIER">Cashier</option>
+          </select>
+
+          <select 
+            value={filterStatus} 
+            onChange={(e) => setFilterStatus(e.target.value)}
+            className="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-sm text-slate-300 outline-none focus:border-blue-500 [color-scheme:dark]"
+          >
+            <option value="">All Statuses</option>
+            <option value="active">Active</option>
+            <option value="inactive">Disabled</option>
+          </select>
         </div>
 
         {/* Data Table */}
-        <div className="flex-1 overflow-auto">
+        <div className="flex-1 overflow-auto pb-32">
           {loading ? (
             <div className="h-full flex items-center justify-center">
               <div className="flex flex-col items-center gap-3 text-slate-400">
@@ -178,13 +243,40 @@ const UsersPage: React.FC = () => {
                         </div>
                       </td>
                       <td className="px-6 py-4 text-right">
-                        <button
-                          onClick={() => toggleStatus(u.id, u.isActive)}
-                          disabled={u.id === currentUser?.id}
-                          className="px-3 py-1.5 text-xs font-medium rounded-lg transition-colors border disabled:opacity-50 disabled:cursor-not-allowed border-slate-700 text-slate-300 hover:bg-slate-800"
-                        >
-                          {u.isActive ? 'Disable' : 'Enable'}
-                        </button>
+                        <div className="flex items-center justify-end gap-2 relative group">
+                          <button
+                            onClick={() => {
+                              setSelectedUserId(u.id);
+                              setResetModalOpen(true);
+                            }}
+                            className="p-1.5 text-slate-400 hover:text-blue-400 hover:bg-blue-500/10 rounded-md transition-colors"
+                            title="Reset Password"
+                          >
+                            <Key size={16} />
+                          </button>
+                          
+                          <select 
+                            value={u.role}
+                            onChange={(e) => changeRole(u.id, e.target.value)}
+                            disabled={u.id === currentUser?.id}
+                            className="bg-slate-900 border border-slate-700 text-xs rounded px-2 py-1 outline-none focus:border-blue-500 disabled:opacity-50"
+                          >
+                            <option value="ADMIN">Admin</option>
+                            <option value="PHARMACIST">Pharmacist</option>
+                            <option value="TECHNICIAN">Technician</option>
+                            <option value="CASHIER">Cashier</option>
+                          </select>
+
+                          <button
+                            onClick={() => toggleStatus(u.id, u.isActive)}
+                            disabled={u.id === currentUser?.id}
+                            className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors border disabled:opacity-50 disabled:cursor-not-allowed ${
+                              u.isActive ? 'border-rose-500/30 text-rose-400 hover:bg-rose-500/10' : 'border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10'
+                            }`}
+                          >
+                            {u.isActive ? 'Disable' : 'Enable'}
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))
@@ -205,7 +297,9 @@ const UsersPage: React.FC = () => {
       {isAddUserModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-sm">
           <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-md shadow-2xl p-6">
-            <h2 className="text-xl font-bold text-white mb-6">Add New Staff Member</h2>
+            <h2 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+              <UserPlus className="text-blue-500" /> Add New Staff Member
+            </h2>
             <form onSubmit={handleAddUser} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -225,7 +319,7 @@ const UsersPage: React.FC = () => {
 
               <div>
                 <label className="block text-sm font-medium text-slate-400 mb-1">Temporary Password *</label>
-                <input required type="password" value={newUser.password} onChange={e => setNewUser({...newUser, password: e.target.value})} className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2 text-white outline-none focus:border-blue-500" />
+                <input required type="password" value={newUser.password} onChange={e => setNewUser({...newUser, password: e.target.value})} className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2 text-white outline-none focus:border-blue-500" minLength={6} />
               </div>
 
               <div>
@@ -244,6 +338,35 @@ const UsersPage: React.FC = () => {
                 </button>
                 <button type="submit" disabled={isSubmitting} className="px-4 py-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm font-semibold rounded-xl shadow-lg transition-all">
                   {isSubmitting ? 'Creating...' : 'Create Account'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ── Reset Password Modal ─────────────────────────────────────────── */}
+      {resetModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-sm">
+          <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-sm shadow-2xl p-6">
+            <h2 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
+              <Key className="text-blue-500" /> Reset Password
+            </h2>
+            <p className="text-sm text-slate-400 mb-6">
+              Enter a new temporary password for this user.
+            </p>
+            <form onSubmit={handleResetPassword} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-400 mb-1">New Password *</label>
+                <input required type="text" value={newPassword} onChange={e => setNewPassword(e.target.value)} className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2 text-white outline-none focus:border-blue-500" minLength={6} placeholder="e.g. TempPass123!" />
+              </div>
+              
+              <div className="pt-4 flex justify-end gap-3 border-t border-slate-800 mt-2">
+                <button type="button" onClick={() => { setResetModalOpen(false); setNewPassword(''); }} className="px-4 py-2 rounded-xl text-sm font-semibold text-slate-300 hover:bg-slate-800 transition-colors">
+                  Cancel
+                </button>
+                <button type="submit" disabled={isSubmitting || newPassword.length < 6} className="px-4 py-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm font-semibold rounded-xl shadow-lg transition-all">
+                  {isSubmitting ? 'Saving...' : 'Save Password'}
                 </button>
               </div>
             </form>

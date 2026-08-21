@@ -8,16 +8,23 @@ import AuditLog from '../models/AuditLog.model';
  * @access  Private (ADMIN)
  */
 export const getAuditLogs = asyncHandler(async (req: Request, res: Response) => {
-  const { action, entityType, limit = 50, page = 1 } = req.query;
+  const { action, targetEntity, limit = 50, page = 1, search } = req.query;
 
   const filter: any = {};
   if (action) filter.action = action;
-  if (entityType) filter.entityType = entityType;
+  if (targetEntity) filter.targetEntity = targetEntity;
+
+  if (search) {
+    filter.$or = [
+      { actorName: { $regex: search, $options: 'i' } },
+      { targetEntity: { $regex: search, $options: 'i' } }
+    ];
+  }
 
   const skip = (Number(page) - 1) * Number(limit);
 
   const logs = await AuditLog.find(filter)
-    .populate('performedBy', 'firstName lastName email role')
+    .populate('actorId', 'firstName lastName email role')
     .sort({ timestamp: -1 })
     .skip(skip)
     .limit(Number(limit))

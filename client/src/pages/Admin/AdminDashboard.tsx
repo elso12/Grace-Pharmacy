@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { Package, ShoppingBag, Users, TrendingUp, AlertTriangle, Loader2, Pill, Plus, ArrowRight } from 'lucide-react';
+import { Package, ShoppingBag, TrendingUp, AlertTriangle, Loader2, Plus, ArrowRight } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AreaChart, Area, XAxis, YAxis, Tooltip as RechartsTooltip, ResponsiveContainer } from 'recharts';
 import api from '../../services/api';

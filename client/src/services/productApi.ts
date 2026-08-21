@@ -73,7 +73,7 @@ export const getAllProducts = async (
   if (requiresPrescription !== undefined) params.requiresPrescription = String(requiresPrescription);
 
   const { data } = await api.get<ProductListResponse>('/products', { params });
-  return data.data;
+  return data.data.map((p: any) => ({ ...p, price: p.unitPrice }));
 };
 
 /**
@@ -81,5 +81,5 @@ export const getAllProducts = async (
  */
 export const getProductById = async (id: string): Promise<Product> => {
   const { data } = await api.get<ProductDetailResponse>(`/products/${id}`);
-  return data.data;
+  return { ...data.data, price: (data.data as any).unitPrice };
 };

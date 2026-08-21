@@ -109,6 +109,28 @@ export const getCustomerOrders = async (
   }
 };
 
+// ─── Get All Orders (Admin) ──────────────────────────────────────────────────
+export const getAllOrders = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const orders = await Order.find()
+      .sort({ createdAt: -1 })
+      .populate('items.medicationId', 'name genericName sku')
+      .populate('customerId', 'firstName lastName email');
+
+    res.status(200).json({
+      status: 'success',
+      results: orders.length,
+      data: orders,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // ─── Get Pending Prescription Orders ─────────────────────────────────────────
 export const getPendingPrescriptionOrders = async (
   req: Request,

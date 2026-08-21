@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Pill, Plus, Search, Loader2, AlertCircle, Package } from 'lucide-react';
+import { Pill, Plus, Search, Loader2, Package } from 'lucide-react';
 import api from '../../services/api';
 
 // Interface definitions based on backend models
@@ -26,7 +26,10 @@ const ProductsPage: React.FC = () => {
   // Modals state
   const [isAddProductModalOpen, setAddProductModalOpen] = useState(false);
   const [isAddBatchModalOpen, setAddBatchModalOpen] = useState(false);
+  const [isEditProductModalOpen, setEditProductModalOpen] = useState(false);
+  const [isDeleteProductModalOpen, setDeleteProductModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
   // Forms state
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -100,6 +103,37 @@ const ProductsPage: React.FC = () => {
     } catch (err) {
       console.error('Failed to add product', err);
       alert('Failed to add product');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleEditProduct = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingProduct) return;
+    try {
+      setIsSubmitting(true);
+      await api.put(`/products/${editingProduct._id}`, editingProduct);
+      setEditProductModalOpen(false);
+      fetchProducts();
+    } catch (err) {
+      console.error('Failed to edit product', err);
+      alert('Failed to edit product');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDeleteProduct = async () => {
+    if (!editingProduct) return;
+    try {
+      setIsSubmitting(true);
+      await api.delete(`/products/${editingProduct._id}`);
+      setDeleteProductModalOpen(false);
+      fetchProducts();
+    } catch (err) {
+      console.error('Failed to delete product', err);
+      alert('Failed to delete product');
     } finally {
       setIsSubmitting(false);
     }
@@ -240,8 +274,23 @@ const ProductsPage: React.FC = () => {
                     >
                       Add Batch
                     </button>
-                    <button className="text-slate-400 hover:text-white transition-colors">
+                    <button 
+                      onClick={() => {
+                        setEditingProduct(product);
+                        setEditProductModalOpen(true);
+                      }}
+                      className="text-slate-400 hover:text-white mr-4 transition-colors"
+                    >
                       Edit
+                    </button>
+                    <button 
+                      onClick={() => {
+                        setEditingProduct(product);
+                        setDeleteProductModalOpen(true);
+                      }}
+                      className="text-rose-400 hover:text-rose-300 transition-colors"
+                    >
+                      Delete
                     </button>
                   </td>
                 </tr>
@@ -380,6 +429,83 @@ const ProductsPage: React.FC = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* ── Edit Medication Modal ─────────────────────────────────────────── */}
+      {isEditProductModalOpen && editingProduct && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-sm overflow-y-auto">
+          <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-2xl shadow-2xl p-6 my-8 relative">
+            <h2 className="text-xl font-bold text-white mb-6">Edit Medication</h2>
+            <form onSubmit={handleEditProduct} className="space-y-6">
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-400 mb-1">Brand Name *</label>
+                  <input required type="text" value={editingProduct.name} onChange={e => setEditingProduct({...editingProduct, name: e.target.value})} className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2 text-white outline-none focus:border-blue-500" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-400 mb-1">Generic Name *</label>
+                  <input required type="text" value={editingProduct.genericName} onChange={e => setEditingProduct({...editingProduct, genericName: e.target.value})} className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2 text-white outline-none focus:border-blue-500" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-400 mb-1">Category *</label>
+                  <select value={editingProduct.category} onChange={e => setEditingProduct({...editingProduct, category: e.target.value})} className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2 text-white outline-none focus:border-blue-500 [color-scheme:dark]">
+                    <option value="OTC">OTC</option>
+                    <option value="PRESCRIPTION">Prescription</option>
+                    <option value="CONTROLLED">Controlled</option>
+                    <option value="SUPPLEMENT">Supplement</option>
+                    <option value="MEDICAL_DEVICE">Medical Device</option>
+                    <option value="COSMETIC">Cosmetic</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-400 mb-1">Unit Price ($) *</label>
+                  <input required type="number" min="0" step="0.01" value={editingProduct.unitPrice} onChange={e => setEditingProduct({...editingProduct, unitPrice: Number(e.target.value)})} className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2 text-white outline-none focus:border-blue-500" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-400 mb-1">Dosage Form</label>
+                  <input type="text" placeholder="e.g. Tablet, Syrup" value={editingProduct.dosageForm} onChange={e => setEditingProduct({...editingProduct, dosageForm: e.target.value})} className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2 text-white outline-none focus:border-blue-500" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-400 mb-1">Strength</label>
+                  <input type="text" placeholder="e.g. 500mg" value={editingProduct.strength} onChange={e => setEditingProduct({...editingProduct, strength: e.target.value})} className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-2 text-white outline-none focus:border-blue-500" />
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 p-3 bg-slate-950 rounded-xl border border-slate-800">
+                <input type="checkbox" id="edit-rx" checked={editingProduct.requiresPrescription} onChange={e => setEditingProduct({...editingProduct, requiresPrescription: e.target.checked})} className="w-4 h-4 rounded text-blue-600 bg-slate-900 border-slate-700 focus:ring-blue-500" />
+                <label htmlFor="edit-rx" className="text-sm text-slate-300 font-medium">Requires Prescription (Rx)</label>
+              </div>
+
+              <div className="pt-4 flex justify-end gap-3 border-t border-slate-800">
+                <button type="button" onClick={() => setEditProductModalOpen(false)} className="px-4 py-2 rounded-xl text-sm font-semibold text-slate-300 hover:bg-slate-800 transition-colors">
+                  Cancel
+                </button>
+                <button type="submit" disabled={isSubmitting} className="px-4 py-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white text-sm font-semibold rounded-xl shadow-lg transition-all">
+                  {isSubmitting ? 'Saving...' : 'Save Changes'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ── Delete Product Modal ─────────────────────────────────────────── */}
+      {isDeleteProductModalOpen && editingProduct && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-sm">
+          <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-md shadow-2xl p-6 relative">
+            <h2 className="text-xl font-bold text-white mb-2">Delete Medication</h2>
+            <p className="text-sm text-slate-400 mb-6">Are you sure you want to delete {editingProduct.name}? This action cannot be undone.</p>
+            <div className="flex justify-end gap-3">
+              <button type="button" onClick={() => setDeleteProductModalOpen(false)} className="px-4 py-2 rounded-xl text-sm font-semibold text-slate-300 hover:bg-slate-800 transition-colors">
+                Cancel
+              </button>
+              <button type="button" onClick={handleDeleteProduct} disabled={isSubmitting} className="px-4 py-2 bg-rose-600 hover:bg-rose-500 disabled:opacity-50 text-white text-sm font-semibold rounded-xl shadow-lg transition-all">
+                {isSubmitting ? 'Deleting...' : 'Delete'}
+              </button>
+            </div>
           </div>
         </div>
       )}

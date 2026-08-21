@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { createOrder, getCustomerOrders, updateOrderStatus, approvePrescriptionOrder, getPendingPrescriptionOrders, getReadyToPackOrders } from '../controllers/orderController';
+import { createOrder, getCustomerOrders, updateOrderStatus, approvePrescriptionOrder, getPendingPrescriptionOrders, getReadyToPackOrders, getAllOrders } from '../controllers/orderController';
 import { protect, authorizeRoles } from '../middleware/authMiddleware';
 import { UserRole } from '../types/enums';
 
@@ -36,6 +36,13 @@ router.patch(
   protect,
   authorizeRoles(UserRole.ADMIN, UserRole.PHARMACIST),
   approvePrescriptionOrder
+);
+
+router.get(
+  '/',
+  protect,
+  authorizeRoles(UserRole.ADMIN, UserRole.PHARMACIST),
+  getAllOrders
 );
 
 export default router;

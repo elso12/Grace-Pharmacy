@@ -25,6 +25,7 @@ import {
   Activity,
   FileSpreadsheet,
 } from "lucide-react";
+import { UserProfileDropdown } from "./layout/UserProfileDropdown";
 
 import {
   MOCK_MEDICATIONS,
@@ -258,15 +259,7 @@ export const POSScreen: React.FC = () => {
             <span className="text-slate-300">F9: Checkout</span>
           </div>
 
-          <div className="flex items-center space-x-3 bg-slate-800/80 px-3 py-1.5 rounded-xl border border-slate-700">
-            <div className="w-8 h-8 rounded-full bg-indigo-600/30 border border-indigo-500/50 flex items-center justify-center text-indigo-300 font-bold text-sm">
-              PH
-            </div>
-            <div className="text-right">
-              <p className="text-xs font-semibold text-slate-200">Pharm. Sarah Jenkins</p>
-              <p className="text-[10px] text-emerald-400 font-mono font-medium">LIC: #PH-98234-CA</p>
-            </div>
-          </div>
+          <UserProfileDropdown />
         </div>
       </header>
 
