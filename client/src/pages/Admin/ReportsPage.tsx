@@ -21,7 +21,7 @@ const ReportsPage: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      const { data } = await api.get('/analytics/financial-summary');
+      const { data } = await api.get('/reports/sales');
       setSummary(data.data);
     } catch (err) {
       console.error('Failed to fetch financial summary:', err);

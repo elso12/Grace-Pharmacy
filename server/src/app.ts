@@ -135,11 +135,9 @@ const managerGuard = [protect, authorizeRoles(UserRole.ADMIN, UserRole.PHARMACIS
 // Strict Admin routes (Blocked against CASHIER, TECHNICIAN, and PHARMACIST)
 const strictAdminGuard = [protect, authorizeRoles(UserRole.ADMIN)];
 
-app.use('/api/pos',       ...internalGuard, saleRouter); // Assuming saleRouter mounts at /api/pos
 app.use('/api/inventory', ...internalGuard, inventoryRoutes);
 app.use('/api/inventory', ...internalGuard, existingInventoryRoutes);
-
-app.use('/api/sales',     ...strictAdminGuard, saleRouter); // Block sales overview from cashiers? Or maybe just use saleRouter for /pos
+app.use('/api/sales',     ...internalGuard, saleRouter);
 app.use('/api/suppliers', ...strictAdminGuard, supplierRouter);
 app.use('/api/alerts',    ...strictAdminGuard, alertRoutes);
 app.use('/api/reports',   ...strictAdminGuard, reportRoutes);

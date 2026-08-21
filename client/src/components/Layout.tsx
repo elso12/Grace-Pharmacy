@@ -35,8 +35,9 @@ interface NavItem {
 const navItems: NavItem[] = [
   { path: '/admin', label: 'Dashboard', icon: <LayoutDashboard size={20} />, roles: ['ADMIN'] },
   { path: '/admin/pos', label: 'POS Terminal', icon: <ShoppingCart size={20} />, roles: ['ADMIN', 'CASHIER', 'PHARMACIST'] },
-  { path: '/admin/pharmacist-dashboard', label: 'Pharmacy Desk', icon: <ActivitySquare size={20} />, roles: ['ADMIN', 'PHARMACIST'] },
   { path: '/admin/prescriptions', label: 'Rx Queue', icon: <FileCheck size={20} />, roles: ['ADMIN', 'PHARMACIST'] },
+  { path: '/admin/batch-tracker', label: 'Batch Tracker', icon: <ActivitySquare size={20} />, roles: ['ADMIN', 'PHARMACIST'] },
+  { path: '/admin/patient-history', label: 'Patient History', icon: <Users size={20} />, roles: ['ADMIN', 'PHARMACIST'] },
   { path: '/admin/pick-list', label: 'Pick List Queue', icon: <FileCheck size={20} />, roles: ['ADMIN', 'PHARMACIST', 'TECHNICIAN'] },
   { path: '/admin/shelf-directory', label: 'Shelf Directory', icon: <Archive size={20} />, roles: ['ADMIN', 'PHARMACIST', 'TECHNICIAN'] },
   { path: '/admin/cycle-count', label: 'Cycle Count', icon: <FileBarChart size={20} />, roles: ['ADMIN', 'PHARMACIST', 'TECHNICIAN'] },

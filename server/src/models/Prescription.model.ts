@@ -24,6 +24,14 @@ export interface IPrescriptionItem {
   notes?: string;
 }
 
+export interface IVerificationDetails {
+  verifiedBy?: Types.ObjectId;
+  verifiedAt?: Date;
+  digitalSignature?: string;
+  clinicalNotes?: string;
+  rejectionReason?: string;
+}
+
 /**
  * Prescription document interface
  */
@@ -39,6 +47,9 @@ export interface IPrescription extends Document {
   dispensedBy?: Types.ObjectId;
   dispensedAt?: Date;
   notes?: string;
+  prescriptionImageUrl?: string;
+  documentUrl?: string;
+  verificationDetails?: IVerificationDetails;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -171,6 +182,21 @@ const prescriptionSchema = new Schema<IPrescription>(
     notes: {
       type: String,
       trim: true,
+    },
+    prescriptionImageUrl: {
+      type: String,
+      trim: true,
+    },
+    documentUrl: {
+      type: String,
+      trim: true,
+    },
+    verificationDetails: {
+      verifiedBy: { type: Schema.Types.ObjectId, ref: 'User' },
+      verifiedAt: { type: Date },
+      digitalSignature: { type: String, trim: true },
+      clinicalNotes: { type: String, trim: true },
+      rejectionReason: { type: String, trim: true },
     },
   },
   {

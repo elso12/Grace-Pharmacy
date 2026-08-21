@@ -5,7 +5,7 @@ import { getAnalyticsSummary, getFinancialSummary, exportReport } from '../contr
 
 const router = Router();
 
-router.get('/summary', getAnalyticsSummary);
+router.get('/dashboard', getAnalyticsSummary);
 router.get('/financial-summary', getFinancialSummary);
 router.get('/export', exportReport);
 

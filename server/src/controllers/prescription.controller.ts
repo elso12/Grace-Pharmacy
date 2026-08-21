@@ -89,3 +89,140 @@ export const updatePrescriptionStatus = asyncHandler(async (req: Request, res: R
     data: prescription,
   });
 });
+
+// ═════════════════════════════════════════════════════════════════════════════
+// POST /api/prescriptions/:id/approve
+// ═════════════════════════════════════════════════════════════════════════════
+export const approvePrescription = asyncHandler(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const { clinicalNotes } = req.body;
+  const pharmacist = (req as any).user;
+
+  const prescription = await Prescription.findById(id);
+  if (!prescription) {
+    res.status(404).json({ status: "error", message: "Prescription not found" });
+    return;
+  }
+
+  if (prescription.status === PrescriptionStatus.APPROVED) {
+    res.status(400).json({ status: "error", message: "Prescription is already approved" });
+    return;
+  }
+
+  // Generate digital signature
+  const timestamp = new Date();
+  const signatureStr = `Signed by ${pharmacist.firstName} ${pharmacist.lastName}, ${pharmacist.role} | ID# ${pharmacist.id} | Timestamp: ${timestamp.toISOString()}`;
+
+  prescription.status = PrescriptionStatus.APPROVED;
+  prescription.verificationDetails = {
+    verifiedBy: pharmacist.id,
+    verifiedAt: timestamp,
+    digitalSignature: signatureStr,
+    clinicalNotes: clinicalNotes || "",
+  };
+
+  await prescription.save();
+
+  res.status(200).json({
+    status: "success",
+    message: "Prescription approved and digitally signed.",
+    data: prescription,
+  });
+});
+
+// ═════════════════════════════════════════════════════════════════════════════
+// POST /api/prescriptions/:id/reject
+// ═════════════════════════════════════════════════════════════════════════════
+export const rejectPrescription = asyncHandler(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const { rejectionReason, clinicalNotes } = req.body;
+  const pharmacist = (req as any).user;
+
+  if (!rejectionReason) {
+    res.status(400).json({ status: "error", message: "Rejection reason is required." });
+    return;
+  }
+
+  const prescription = await Prescription.findById(id);
+  if (!prescription) {
+    res.status(404).json({ status: "error", message: "Prescription not found" });
+    return;
+  }
+
+  const timestamp = new Date();
+  const signatureStr = `Rejected by ${pharmacist.firstName} ${pharmacist.lastName} | Timestamp: ${timestamp.toISOString()}`;
+
+  prescription.status = PrescriptionStatus.REJECTED;
+  prescription.verificationDetails = {
+    verifiedBy: pharmacist.id,
+    verifiedAt: timestamp,
+    digitalSignature: signatureStr,
+    clinicalNotes: clinicalNotes || "",
+    rejectionReason: rejectionReason,
+  };
+
+  await prescription.save();
+
+  res.status(200).json({
+    status: "success",
+    message: "Prescription rejected.",
+    data: prescription,
+  });
+});
+
+// ═════════════════════════════════════════════════════════════════════════════
+// GET /api/prescriptions/patients/:id/history
+// ═════════════════════════════════════════════════════════════════════════════
+import Customer from "../models/Customer.model";
+
+export const getPatientHistory = asyncHandler(async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  const patient = await Customer.findById(id).select("-password");
+  if (!patient) {
+    res.status(404).json({ status: "error", message: "Patient not found" });
+    return;
+  }
+
+  const prescriptions = await Prescription.find({ patient: id }).sort({ prescriptionDate: -1 });
+
+  res.status(200).json({
+    status: "success",
+    data: {
+      patient,
+      prescriptions,
+    },
+  });
+});
+
+// ═════════════════════════════════════════════════════════════════════════════
+// POST /api/prescriptions/patients/:id/notes
+// ═════════════════════════════════════════════════════════════════════════════
+export const addConsultationNote = asyncHandler(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const { note } = req.body;
+  const pharmacist = (req as any).user;
+
+  if (!note) {
+    res.status(400).json({ status: "error", message: "Consultation note is required." });
+    return;
+  }
+
+  const patient = await Customer.findById(id);
+  if (!patient) {
+    res.status(404).json({ status: "error", message: "Patient not found" });
+    return;
+  }
+
+  const timestamp = new Date().toISOString();
+  const formattedNote = `\n--- [${timestamp}] by ${pharmacist.firstName} ${pharmacist.lastName} (${pharmacist.role}) ---\n${note}`;
+
+  patient.notes = (patient.notes || "") + formattedNote;
+  await patient.save();
+
+  res.status(200).json({
+    status: "success",
+    message: "Consultation note added to patient history.",
+    data: patient,
+  });
+});

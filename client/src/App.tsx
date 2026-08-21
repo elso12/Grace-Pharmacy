@@ -10,6 +10,7 @@ import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
+import { Toaster } from 'react-hot-toast';
 
 // New Storefront Pages & Layouts
 import StorefrontLayout from './layouts/StorefrontLayout';
@@ -22,12 +23,15 @@ import PatientPortal from './pages/Customer/PatientPortal';
 import AdminDashboard from './pages/Admin/AdminDashboard';
 import InventoryFEFOPage from './pages/Admin/InventoryFEFOPage';
 import ProductsPage from './pages/Admin/ProductsPage';
-import PharmacistQueue from './pages/Admin/PharmacistQueue';
-import PharmacistDashboard from './pages/Admin/PharmacistDashboard';
 import UsersPage from './pages/Admin/UsersPage';
 import AuditLogPage from './pages/Admin/AuditLogPage';
 import ReportsPage from './pages/Admin/ReportsPage';
 import OrdersPage from './pages/Admin/OrdersPage';
+
+// Pharmacist Pages
+import PrescriptionQueuePage from './pages/Pharmacist/PrescriptionQueuePage';
+import BatchTrackerPage from './pages/Pharmacist/BatchTrackerPage';
+import PatientHistoryPage from './pages/Pharmacist/PatientHistoryPage';
 
 import PickListQueue from './pages/Technician/PickListQueue';
 import CycleCountForm from './pages/Technician/CycleCountForm';
@@ -38,6 +42,7 @@ import ShelfDirectory from './pages/Technician/ShelfDirectory';
 const App: React.FC = () => (
   <AuthProvider>
     <BrowserRouter>
+      <Toaster position="top-right" toastOptions={{ className: 'bg-slate-800 text-white border border-slate-700' }} />
       <CartProvider>
         <Routes>
           {/* Public Storefront Routes — wrapped in CartProvider for shared cart state */}
@@ -65,8 +70,9 @@ const App: React.FC = () => (
               
               {/* Common Manager/Staff Pages */}
               <Route element={<ProtectedRoute allowedRoles={['PHARMACIST', 'ADMIN']} />}>
-                <Route path="prescriptions" element={<PharmacistQueue />} />
-                <Route path="pharmacist-dashboard" element={<PharmacistDashboard />} />
+                <Route path="prescriptions" element={<PrescriptionQueuePage />} />
+                <Route path="batch-tracker" element={<BatchTrackerPage />} />
+                <Route path="patient-history" element={<PatientHistoryPage />} />
               </Route>
 
               {/* Technician / Staff Pages */}

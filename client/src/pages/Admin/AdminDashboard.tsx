@@ -24,7 +24,7 @@ const AdminDashboard: React.FC = () => {
       try {
         // Analytics endpoint maps to /analytics/dashboard but the route in app.ts mounts at /api/analytics
         // wait, earlier we checked analyticsController.ts, it doesn't specify route. I'll use /analytics/summary
-        const { data } = await api.get('/analytics/summary');
+        const { data } = await api.get('/analytics/dashboard');
         setAnalytics(data.data);
       } catch (err) {
         console.error('Failed to fetch analytics', err);

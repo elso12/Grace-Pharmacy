@@ -21,10 +21,11 @@ export const productRouter = productRoutes;
 // ─── Inventory Routes (FULLY IMPLEMENTED) ───────────────────────────────────
 export const inventoryRouter = inventoryRoutes;
 
-// ─── Customer Routes ────────────────────────────────────────────────────────
+import Customer from "../models/Customer.model";
 export const customerRouter = Router();
-customerRouter.get("/", (_req, res) => {
-  res.json({ message: "Customer routes — coming soon" });
+customerRouter.get("/", async (_req, res) => {
+  const customers = await Customer.find().select("-password").sort({ lastName: 1 });
+  res.json({ status: "success", data: customers });
 });
 
 // ─── Prescription Routes (FULLY IMPLEMENTED) ────────────────────────────────

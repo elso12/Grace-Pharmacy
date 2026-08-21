@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import { useAuth } from '../../context/AuthContext';
 import { 
   LogOut, 
@@ -53,11 +54,11 @@ export const UserProfileDropdown: React.FC = () => {
 
   const getDashboardRoute = (role: string) => {
     switch (role) {
-      case 'ADMIN': return '/admin';
-      case 'PHARMACIST': return '/pharmacist';
-      case 'TECHNICIAN': return '/technician';
-      case 'CASHIER': return '/pos';
-      default: return '/customer/orders';
+      case 'ADMIN': return '/admin/dashboard';
+      case 'PHARMACIST': return '/admin/prescriptions';
+      case 'TECHNICIAN': return '/admin/pick-list';
+      case 'CASHIER': return '/admin/pos';
+      default: return '/orders';
     }
   };
 
@@ -143,7 +144,7 @@ export const UserProfileDropdown: React.FC = () => {
             <button
               onClick={() => {
                 setIsOpen(false);
-                navigate('/settings');
+                toast.error('Account Settings are under construction.', { icon: '🚧' });
               }}
               className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-200 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800/80 transition-colors"
             >

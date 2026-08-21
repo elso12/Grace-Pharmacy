@@ -9,8 +9,10 @@ export enum UserRole {
 
 // ─── Prescription Status ────────────────────────────────────────────────────
 export enum PrescriptionStatus {
-  PENDING = "PENDING",
+  PENDING = "PENDING", // Used for patient-submitted but not yet finalized
+  PENDING_VERIFICATION = "PENDING_VERIFICATION", // Awaiting Pharmacist review
   IN_REVIEW = "IN_REVIEW",
+  APPROVED = "APPROVED",
   APPROVED_WITH_NOTES = "APPROVED_WITH_NOTES",
   REJECTED = "REJECTED",
   DISPENSED = "DISPENSED",

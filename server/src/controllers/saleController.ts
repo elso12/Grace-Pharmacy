@@ -2,9 +2,11 @@ import { Request, Response } from 'express';
 import { asyncHandler } from '../utils/errors';
 import { AppError } from '../utils/errors';
 import Prescription from '../models/Prescription.model';
-import { PrescriptionStatus } from '../types/enums';
+import { PrescriptionStatus, SaleStatus } from '../types/enums';
 // Reusing orderController's createOrder logic for the actual order creation
 import { createOrder as baseCreateOrder } from './orderController';
+import Sale from '../models/Sale.model';
+import InventoryBatch from '../models/InventoryBatch.model';
 
 /**
  * @desc    POS Checkout: Validates prescription status before proceeding to dispense
@@ -46,4 +48,40 @@ export const posCheckout = asyncHandler(async (req: Request, res: Response, next
   
   // Call baseCreateOrder
   return baseCreateOrder(req, res, next);
+});
+
+/**
+ * @desc    Process a refund
+ * @route   POST /api/sales/:id/refund
+ * @access  Private (CASHIER, PHARMACIST, ADMIN)
+ */
+export const refundSale = asyncHandler(async (req: Request, res: Response) => {
+  const sale = await Sale.findById(req.params.id);
+  
+  if (!sale) {
+    throw new AppError('Sale not found', 404);
+  }
+
+  if (sale.status === SaleStatus.REFUNDED) {
+    throw new AppError('Sale is already refunded', 400);
+  }
+
+  // 1. Rollback stock in inventory batches
+  for (const item of sale.items) {
+    const batch = await InventoryBatch.findById(item.batchId);
+    if (batch) {
+      batch.quantity += item.quantity;
+      await batch.save();
+    }
+  }
+
+  // 2. Mark sale as refunded
+  sale.status = SaleStatus.REFUNDED;
+  await sale.save();
+
+  res.status(200).json({
+    success: true,
+    message: 'Sale refunded and stock rolled back successfully',
+    data: sale,
+  });
 });

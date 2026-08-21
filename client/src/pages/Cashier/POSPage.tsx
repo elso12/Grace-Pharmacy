@@ -335,7 +335,7 @@ const POSPage: React.FC = () => {
         quantity: item.quantity
       }));
 
-      const { data } = await api.post('/sales/checkout', {
+      const { data } = await api.post('/sales/pos', {
         items,
         prescriptionId: prescriptionId || undefined,
         paymentMethod

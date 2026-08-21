@@ -28,6 +28,7 @@ import {
   lowStockAlerts,
   quarantineBatch,
   submitCycleCount,
+  getBatches,
 } from "../controllers/inventory.controller";
 
 const router = Router();
@@ -40,6 +41,13 @@ router.post(
   authorizeRoles(UserRole.ADMIN, UserRole.PHARMACIST),
   validate(addBatchSchema, "body"),
   addBatch
+);
+
+// ─── GET /api/inventory/batches ─────────────────────────────────────────────
+router.get(
+  "/batches",
+  authorizeRoles(UserRole.ADMIN, UserRole.PHARMACIST, UserRole.TECHNICIAN),
+  getBatches
 );
 
 // ─── GET /api/inventory/fefo-dispense?productId=X&quantity=Y ────────────────

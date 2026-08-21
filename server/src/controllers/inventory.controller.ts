@@ -184,3 +184,11 @@ export const submitCycleCount = asyncHandler(async (req: Request, res: Response)
     data: { cycleCount },
   });
 });
+
+export const getBatches = asyncHandler(async (req: Request, res: Response) => {
+  const batches = await InventoryBatch.find().populate('product', 'name category unitPrice').sort({ expiryDate: 1 });
+  res.status(200).json({
+    success: true,
+    data: batches,
+  });
+});
