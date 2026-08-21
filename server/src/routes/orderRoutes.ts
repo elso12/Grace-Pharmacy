@@ -1,13 +1,14 @@
 import { Router } from 'express';
-import { createOrder, getCustomerOrders, updateOrderStatus, approvePrescriptionOrder, getPendingPrescriptionOrders, getReadyToPackOrders, getAllOrders } from '../controllers/orderController';
+import { createOrder, getCustomerOrders, updateOrderStatus, approvePrescriptionOrder, getPendingPrescriptionOrders, getReadyToPackOrders, getAllOrders, getOrderById } from '../controllers/orderController';
 import { protect, authorizeRoles } from '../middleware/authMiddleware';
 import { UserRole } from '../types/enums';
 
 const router = Router();
 
 // Routes for Customers
-router.post('/checkout', protect, authorizeRoles(UserRole.CUSTOMER), createOrder);
-router.get('/my-orders', protect, authorizeRoles(UserRole.CUSTOMER), getCustomerOrders);
+router.post('/checkout', protect, authorizeRoles(UserRole.CUSTOMER, UserRole.ADMIN), createOrder);
+router.get('/customer', protect, authorizeRoles(UserRole.CUSTOMER, UserRole.ADMIN), getCustomerOrders);
+router.get('/customer/:id', protect, authorizeRoles(UserRole.CUSTOMER, UserRole.ADMIN), getOrderById);
 
 // Routes for Admin/Pharmacist/Technician Routes
 router.patch(

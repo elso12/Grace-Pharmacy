@@ -226,3 +226,106 @@ export const addConsultationNote = asyncHandler(async (req: Request, res: Respon
     data: patient,
   });
 });
+
+// ═════════════════════════════════════════════════════════════════════════════
+// POST /api/prescriptions/upload
+// ═════════════════════════════════════════════════════════════════════════════
+export const uploadPrescription = asyncHandler(async (req: Request, res: Response) => {
+  const { doctorName, medications, prescriptionImageUrl, documentUrl } = req.body;
+  const user = await import("../models/User.model").then(m => m.default.findById((req as any).user.id));
+  
+  if (!user) {
+    res.status(404).json({ status: "error", message: "User not found" });
+    return;
+  }
+
+  const patient = await Customer.findOne({ $or: [{ email: user.email }, { phone: user.phone }] });
+  if (!patient) {
+    res.status(404).json({ status: "error", message: "Customer profile not found. Please update your profile first." });
+    return;
+  }
+
+  // Create a pending prescription
+  const prescription = await Prescription.create({
+    tenantId: user.tenantId || "60d5ecb8b392d725409d5718", // placeholder tenant id if missing
+    patient: patient._id,
+    doctor: { name: doctorName || "Unknown" },
+    medications: medications || [],
+    prescriptionImageUrl,
+    documentUrl,
+    status: PrescriptionStatus.PENDING,
+    expiryDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 year default expiry
+    refillsRemaining: 0,
+  });
+
+  res.status(201).json({
+    status: "success",
+    message: "Prescription uploaded successfully",
+    data: prescription,
+  });
+});
+
+// ═════════════════════════════════════════════════════════════════════════════
+// POST /api/prescriptions/:id/refill
+// ═════════════════════════════════════════════════════════════════════════════
+import { Order } from "../models";
+import { OrderStatus, FulfillmentType, PaymentMethod } from "../types/enums";
+
+export const requestRefill = asyncHandler(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const customerId = (req as any).user.id;
+
+  const prescription = await Prescription.findById(id).populate('medications.product');
+  if (!prescription) {
+    res.status(404).json({ status: "error", message: "Prescription not found" });
+    return;
+  }
+
+  if (prescription.refillsRemaining <= 0) {
+    res.status(400).json({ status: "error", message: "No refills remaining on this prescription" });
+    return;
+  }
+
+  if (prescription.expiryDate < new Date()) {
+    res.status(400).json({ status: "error", message: "This prescription has expired" });
+    return;
+  }
+
+  // Decrement refills
+  prescription.refillsRemaining -= 1;
+  await prescription.save();
+
+  // Calculate items and cost for the order
+  let totalAmount = 0;
+  const orderItems = prescription.medications.map(med => {
+    // Basic fallback price if product is not populated correctly
+    const price = (med.product as any).price || 10; 
+    totalAmount += price * med.quantity;
+    return {
+      medicationId: med.product._id || med.product,
+      quantity: med.quantity,
+      priceAtPurchase: price,
+    };
+  });
+
+  // Create a pending order for the refill
+  const order = await Order.create({
+    customerId,
+    items: orderItems,
+    totalAmount,
+    status: OrderStatus.PENDING,
+    fulfillmentType: FulfillmentType.PICKUP,
+    paymentMethod: PaymentMethod.CASH,
+    prescriptionRequired: true,
+    approvedByPharmacist: false, // Must be re-approved by Pharmacist or we can auto-approve based on logic. Let's require Pharmacist approval for refills.
+  });
+
+  res.status(201).json({
+    status: "success",
+    message: "Refill requested successfully",
+    data: {
+      prescription,
+      order,
+    }
+  });
+});

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Outlet, Link, useNavigate } from 'react-router-dom';
-import { Search, ShoppingCart, User, Pill, Activity, Baby, Heart, LayoutDashboard, Package } from 'lucide-react';
+import { Search, ShoppingCart, User, Pill, Activity, Baby, Heart, LayoutDashboard, Package, MessageSquare } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import NotificationBell from '../components/NotificationBell';
@@ -82,6 +82,13 @@ const StorefrontLayout: React.FC = () => {
                       >
                         <Package className="h-4 w-4" />
                         My Orders
+                      </Link>
+                      <Link
+                        to="/messages"
+                        className="hidden sm:flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-blue-600 transition-colors"
+                      >
+                        <MessageSquare className="h-4 w-4" />
+                        Messages
                       </Link>
                     </>
                   )}

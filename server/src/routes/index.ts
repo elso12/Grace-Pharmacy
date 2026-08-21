@@ -21,12 +21,9 @@ export const productRouter = productRoutes;
 // ─── Inventory Routes (FULLY IMPLEMENTED) ───────────────────────────────────
 export const inventoryRouter = inventoryRoutes;
 
-import Customer from "../models/Customer.model";
-export const customerRouter = Router();
-customerRouter.get("/", async (_req, res) => {
-  const customers = await Customer.find().select("-password").sort({ lastName: 1 });
-  res.json({ status: "success", data: customers });
-});
+import customerRoutes from "./customerRoutes";
+export { default as messageRouter } from './messageRoutes';
+export const customerRouter = customerRoutes;
 
 // ─── Prescription Routes (FULLY IMPLEMENTED) ────────────────────────────────
 export const prescriptionRouter = prescriptionRoutes;

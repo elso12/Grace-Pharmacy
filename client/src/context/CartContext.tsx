@@ -46,6 +46,7 @@ export interface CartItem {
   quantity: number;
   imageUrl?: string;
   category:  string;
+  requiresPrescription?: boolean;
 }
 
 interface CartState {
@@ -103,6 +104,7 @@ function cartReducer(state: CartState, action: CartAction): CartState {
         quantity: 1,
         imageUrl: product.imageUrl,
         category: product.category,
+        requiresPrescription: product.requiresPrescription,
       };
       return { items: [...state.items, newItem] };
     }

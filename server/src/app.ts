@@ -34,7 +34,7 @@ import analyticsRoutes        from './routes/analyticsRoutes';
 import authRoutes             from './routes/authRoutes';
 import orderRoutes            from './routes/orderRoutes';
 import productRoutes          from './routes/productRoutes';   // B2C storefront catalog
-import { inventoryRouter, prescriptionRouter, customerRouter, productRouter, authRouter, supplierRouter, userRouter, auditRouter, saleRouter } from './routes/index';
+import { inventoryRouter, prescriptionRouter, customerRouter, productRouter, authRouter, supplierRouter, userRouter, auditRouter, saleRouter, messageRouter } from './routes/index';
 import alertRoutes            from './routes/alertRoutes';
 import reportRoutes           from './routes/reportRoutes';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
@@ -144,6 +144,8 @@ app.use('/api/reports',   ...strictAdminGuard, reportRoutes);
 app.use('/api/analytics', ...strictAdminGuard, analyticsRoutes);
 app.use('/api/users',     ...strictAdminGuard, userRouter);
 app.use('/api/audit-logs',  ...strictAdminGuard, auditRouter);
+
+app.use('/api/messages', protect, messageRouter);
 
 // ─── 5. Error Handling ───────────────────────────────────────────────────────
 // These MUST be registered last — Express identifies error middleware by arity=4.

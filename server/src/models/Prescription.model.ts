@@ -41,6 +41,7 @@ export interface IPrescription extends Document {
   prescriptionNumber: string;
   doctor: IDoctorInfo;
   medications: IPrescriptionItem[];
+  refillsRemaining: number;
   status: PrescriptionStatus;
   prescriptionDate: Date;
   expiryDate: Date;
@@ -156,6 +157,11 @@ const prescriptionSchema = new Schema<IPrescription>(
           message: 'Prescription must contain at least one medication',
         },
       ],
+    },
+    refillsRemaining: {
+      type: Number,
+      default: 0,
+      min: [0, 'Refills cannot be negative'],
     },
     status: {
       type: String,

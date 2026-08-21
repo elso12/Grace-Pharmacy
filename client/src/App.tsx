@@ -20,6 +20,8 @@ import CheckoutPage from './pages/Storefront/CheckoutPage';
 import OrderHistoryPage from './pages/Customer/OrderHistoryPage';
 import PatientPortal from './pages/Customer/PatientPortal';
 
+import MessagesPage from './pages/Common/MessagesPage';
+
 import AdminDashboard from './pages/Admin/AdminDashboard';
 import InventoryFEFOPage from './pages/Admin/InventoryFEFOPage';
 import ProductsPage from './pages/Admin/ProductsPage';
@@ -55,6 +57,7 @@ const App: React.FC = () => (
             <Route element={<ProtectedRoute allowedRoles={['CUSTOMER']} />}>
               <Route path="/orders" element={<OrderHistoryPage />} />
               <Route path="/patient-portal" element={<PatientPortal />} />
+              <Route path="/messages" element={<div className="p-4 md:p-8 max-w-7xl mx-auto"><MessagesPage /></div>} />
             </Route>
           </Route>
 
@@ -74,6 +77,9 @@ const App: React.FC = () => (
                 <Route path="batch-tracker" element={<BatchTrackerPage />} />
                 <Route path="patient-history" element={<PatientHistoryPage />} />
               </Route>
+
+              {/* Universal Staff Pages */}
+              <Route path="messages" element={<MessagesPage />} />
 
               {/* Technician / Staff Pages */}
               <Route element={<ProtectedRoute allowedRoles={['TECHNICIAN', 'PHARMACIST', 'ADMIN']} />}>

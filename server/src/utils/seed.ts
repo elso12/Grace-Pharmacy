@@ -35,7 +35,8 @@ async function seedMasterDatabase() {
       'consultations',
       'auditlogs',
       'alerts',
-      'customers'
+      'customers',
+      'messages'
     ];
     for (const name of collections) {
       try {
@@ -408,6 +409,7 @@ async function seedMasterDatabase() {
         ],
         prescriptionDate: daysAgo(4),
         status: 'PREPARED',
+        refillsRemaining: 2,
         verificationDetails: {
           verifiedBy: userIds[1], // Pharmacist
           verifiedAt: daysAgo(3),
@@ -489,7 +491,51 @@ async function seedMasterDatabase() {
       },
     ];
     await db.collection('sales').insertMany(sales);
-    await db.collection('orders').insertMany(sales);
+    
+    // Seed genuine Customer Orders
+    const orders = [
+      {
+        tenantId: userIds[0], // fallback
+        branchId: userIds[0], // fallback
+        customerId: userIds[4], // John Doe
+        items: [
+          { medicationId: productIds[1], quantity: 1, priceAtPurchase: 6.0 },
+          { medicationId: productIds[4], quantity: 1, priceAtPurchase: 42.5 }
+        ],
+        totalAmount: 48.5,
+        status: 'PREPARED',
+        fulfillmentType: 'PICKUP',
+        paymentMethod: 'CASH',
+        paymentStatus: 'UNPAID',
+        prescriptionRequired: true,
+        approvedByPharmacist: true,
+        createdAt: daysAgo(1),
+        updatedAt: daysAgo(1)
+      },
+      {
+        tenantId: userIds[0],
+        branchId: userIds[0],
+        customerId: userIds[4],
+        items: [
+          { medicationId: productIds[2], quantity: 2, priceAtPurchase: 8.75 }
+        ],
+        totalAmount: 17.5,
+        status: 'COMPLETED',
+        fulfillmentType: 'DELIVERY',
+        shippingAddress: {
+          street: '742 Evergreen Terrace',
+          city: 'Springfield',
+          zip: '12345'
+        },
+        paymentMethod: 'CREDIT_CARD',
+        paymentStatus: 'PAID',
+        prescriptionRequired: false,
+        approvedByPharmacist: true,
+        createdAt: daysAgo(10),
+        updatedAt: daysAgo(9)
+      }
+    ];
+    await db.collection('orders').insertMany(orders);
     console.log(' Created historical POS transactions and order records.');
 
     // 7. Seed System Audit Logs (For Admin Security View)
@@ -528,6 +574,113 @@ async function seedMasterDatabase() {
     ];
     await db.collection('auditlogs').insertMany(auditLogs);
     console.log(' Created system audit trail records.');
+
+    // 8. Seed Messages
+    console.log('Seeding Mock Messages...');
+    const messages = [
+      // Admin (Dr. Sarah Jenkins - userIds[0]) <-> Pharmacist (Marcus Vance - userIds[1])
+      {
+        conversationId: [userIds[0].toString(), userIds[1].toString()].sort().join('_'),
+        senderId: userIds[0],
+        senderName: 'Dr. Sarah Jenkins',
+        senderRole: 'ADMIN',
+        receiverId: userIds[1],
+        receiverName: 'Marcus Vance, PharmD',
+        receiverRole: 'PHARMACIST',
+        message: 'Marcus, please prioritize reviewing incoming Amoxicillin prescriptions today.',
+        isRead: true,
+        createdAt: daysAgo(1),
+      },
+      {
+        conversationId: [userIds[0].toString(), userIds[1].toString()].sort().join('_'),
+        senderId: userIds[1],
+        senderName: 'Marcus Vance, PharmD',
+        senderRole: 'PHARMACIST',
+        receiverId: userIds[0],
+        receiverName: 'Dr. Sarah Jenkins',
+        receiverRole: 'ADMIN',
+        message: 'Understood Dr. Sarah, on it now.',
+        isRead: false,
+        createdAt: daysAgo(1),
+      },
+      // Pharmacist (Marcus Vance - userIds[1]) <-> Technician (David Chen - userIds[2])
+      {
+        conversationId: [userIds[1].toString(), userIds[2].toString()].sort().join('_'),
+        senderId: userIds[1],
+        senderName: 'Marcus Vance, PharmD',
+        senderRole: 'PHARMACIST',
+        receiverId: userIds[2],
+        receiverName: 'David Chen (Lead Tech)',
+        receiverRole: 'TECHNICIAN',
+        message: 'David, Jane Smith\'s Ventolin prescription is approved. Please prepare it from Aisle 4, Shelf D.',
+        isRead: true,
+        createdAt: new Date(Date.now() - 3600000), // 1 hour ago
+      },
+      {
+        conversationId: [userIds[1].toString(), userIds[2].toString()].sort().join('_'),
+        senderId: userIds[2],
+        senderName: 'David Chen (Lead Tech)',
+        senderRole: 'TECHNICIAN',
+        receiverId: userIds[1],
+        receiverName: 'Marcus Vance, PharmD',
+        receiverRole: 'PHARMACIST',
+        message: 'Got it! Packaging it now.',
+        isRead: true,
+        createdAt: new Date(Date.now() - 3500000), 
+      },
+      // Technician (David Chen - userIds[2]) <-> Cashier (Elena Gomez - userIds[3])
+      {
+        conversationId: [userIds[2].toString(), userIds[3].toString()].sort().join('_'),
+        senderId: userIds[2],
+        senderName: 'David Chen (Lead Tech)',
+        senderRole: 'TECHNICIAN',
+        receiverId: userIds[3],
+        receiverName: 'Elena Gomez (Senior Cashier)',
+        receiverRole: 'CASHIER',
+        message: 'Elena, Order #REC-2026-1002 is packed and placed on the front pickup shelf.',
+        isRead: true,
+        createdAt: new Date(Date.now() - 1800000),
+      },
+      {
+        conversationId: [userIds[2].toString(), userIds[3].toString()].sort().join('_'),
+        senderId: userIds[3],
+        senderName: 'Elena Gomez (Senior Cashier)',
+        senderRole: 'CASHIER',
+        receiverId: userIds[2],
+        receiverName: 'David Chen (Lead Tech)',
+        receiverRole: 'TECHNICIAN',
+        message: 'Thanks David, I see the customer walking in now.',
+        isRead: false,
+        createdAt: new Date(Date.now() - 1700000),
+      },
+      // Customer (John Doe - userIds[4]) <-> Pharmacist (Marcus Vance - userIds[1])
+      {
+        conversationId: [userIds[4].toString(), userIds[1].toString()].sort().join('_'),
+        senderId: userIds[4],
+        senderName: 'John Doe (Patient)',
+        senderRole: 'CUSTOMER',
+        receiverId: userIds[1],
+        receiverName: 'Marcus Vance, PharmD',
+        receiverRole: 'PHARMACIST',
+        message: 'Hello, should I take the Amoxicillin with or without food?',
+        isRead: true,
+        createdAt: new Date(Date.now() - 600000),
+      },
+      {
+        conversationId: [userIds[4].toString(), userIds[1].toString()].sort().join('_'),
+        senderId: userIds[1],
+        senderName: 'Marcus Vance, PharmD',
+        senderRole: 'PHARMACIST',
+        receiverId: userIds[4],
+        receiverName: 'John Doe (Patient)',
+        receiverRole: 'CUSTOMER',
+        message: 'Hello John, take it with a meal and a full glass of water to avoid stomach upset.',
+        isRead: false,
+        createdAt: new Date(Date.now() - 300000),
+      }
+    ];
+    await db.collection('messages').insertMany(messages);
+    console.log(' Created mock messages.');
 
     console.log('\n──────────────────────────────────────────────────────────');
     console.log('✅ Master Database Seeding Completed Successfully!');

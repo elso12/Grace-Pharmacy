@@ -23,6 +23,6 @@ export const createOrder = async (
 };
 
 export const getUserOrders = async (): Promise<OrderResponse[]> => {
-  const { data } = await api.get('/orders/myorders');
+  const { data } = await api.get('/orders/customer');
   return data.data;
 };

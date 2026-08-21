@@ -18,6 +18,7 @@ interface ShippingForm {
   fulfillmentType: FulfillmentType;
   paymentMethod:   string;
   notes:           string;
+  prescriptionImageUrl?: string;
 }
 
 const INITIAL_FORM: ShippingForm = {
@@ -31,6 +32,7 @@ const INITIAL_FORM: ShippingForm = {
   fulfillmentType: 'DELIVERY',
   paymentMethod:   'CREDIT_CARD',
   notes:           '',
+  prescriptionImageUrl: '',
 };
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -53,6 +55,8 @@ const CheckoutPage: React.FC = () => {
   const subtotal        = cartTotal;
   const tax             = subtotal * TAX_RATE;
   const orderTotal      = subtotal + tax + DELIVERY_FEE;
+  
+  const hasRxItems = items.some(item => item.requiresPrescription);
 
   // ── Form helpers ────────────────────────────────────────────────────────
   const handleField = (
@@ -66,8 +70,8 @@ const CheckoutPage: React.FC = () => {
     form.firstName.trim() &&
     form.lastName.trim()  &&
     form.email.trim()     &&
-    form.phone.trim()     &&
-    (form.fulfillmentType === 'PICKUP' || (form.address.trim() && form.city.trim() && form.zip.trim()));
+    (form.fulfillmentType === 'PICKUP' || (form.address.trim() && form.city.trim() && form.zip.trim())) &&
+    (!hasRxItems || form.prescriptionImageUrl?.trim());
 
   // ── Submit ──────────────────────────────────────────────────────────────
   const handleCheckout = async (e: React.FormEvent) => {
@@ -99,6 +103,7 @@ const CheckoutPage: React.FC = () => {
         tax,
         deliveryFee:     DELIVERY_FEE,
         total:           orderTotal,
+        prescriptionImageUrl: form.prescriptionImageUrl,
       });
 
       // ✅ Success path
@@ -547,6 +552,34 @@ const CheckoutPage: React.FC = () => {
                   />
                 </div>
               </div>
+
+            {/* ── Prescription Upload (Conditional) ────────────────── */}
+            {hasRxItems && (
+              <div className="bg-white rounded-2xl border border-rose-200 shadow-sm p-6">
+                <h2 className="text-sm font-bold text-rose-700 uppercase tracking-wider mb-5 flex items-center gap-2">
+                  <AlertCircle className="h-4 w-4" />
+                  Prescription Required
+                </h2>
+                <div>
+                  <p className="text-sm text-slate-600 mb-4">
+                    Your cart contains medication that requires a prescription. Please upload a clear photo or document.
+                  </p>
+                  <label htmlFor="checkout-prescription" className="block text-xs font-semibold text-slate-600 mb-1.5">
+                    Prescription Image URL <span className="text-rose-500">*</span>
+                  </label>
+                  <input
+                    id="checkout-prescription"
+                    name="prescriptionImageUrl"
+                    type="url"
+                    value={form.prescriptionImageUrl}
+                    onChange={handleField}
+                    required={hasRxItems}
+                    placeholder="https://example.com/prescription.jpg"
+                    className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
+                  />
+                </div>
+              </div>
+            )}
 
             {/* ── Error banner ───────────────────────────────────────── */}
             {error && (

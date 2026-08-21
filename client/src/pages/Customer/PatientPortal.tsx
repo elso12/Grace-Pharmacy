@@ -16,7 +16,7 @@ const PatientPortal: React.FC = () => {
       try {
         const [rxRes, ordRes] = await Promise.all([
           api.get('/api/prescriptions/my-prescriptions'),
-          api.get('/api/orders/my-orders')
+          api.get('/api/orders/customer')
         ]);
         setPrescriptions(rxRes.data.data);
         setOrders(ordRes.data.data);
@@ -29,10 +29,35 @@ const PatientPortal: React.FC = () => {
     fetchData();
   }, []);
 
-  const handlePrescriptionUpload = (file: File) => {
-    console.log("Uploaded file:", file.name);
-    // In a real implementation, you would send this to S3/Cloud Storage and create a Prescription record
-    alert("Prescription uploaded successfully. A pharmacist will review it shortly.");
+  const handleRefill = async (id: string) => {
+    try {
+      await api.post(`/api/prescriptions/${id}/refill`);
+      alert("Refill requested successfully. An order has been placed.");
+      // Refresh data
+      const [rxRes, ordRes] = await Promise.all([
+        api.get('/api/prescriptions/my-prescriptions'),
+        api.get('/api/orders/customer')
+      ]);
+      setPrescriptions(rxRes.data.data);
+      setOrders(ordRes.data.data);
+    } catch (err: any) {
+      alert(err.response?.data?.message || "Failed to request refill.");
+    }
+  };
+
+  const handlePrescriptionUpload = async (_file: File) => {
+    try {
+      // We would upload to S3 here, but for this demo we'll just mock an image URL
+      const mockedUrl = "https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?w=600";
+      await api.post('/api/prescriptions/upload', {
+        prescriptionImageUrl: mockedUrl
+      });
+      alert("Prescription uploaded successfully. A pharmacist will review it shortly.");
+      const rxRes = await api.get('/api/prescriptions/my-prescriptions');
+      setPrescriptions(rxRes.data.data);
+    } catch (err: any) {
+      alert(err.response?.data?.message || "Failed to upload prescription.");
+    }
   };
 
   return (
@@ -97,7 +122,10 @@ const PatientPortal: React.FC = () => {
                         <p className="text-sm text-slate-500">Status: <span className="font-medium text-purple-600 capitalize">{rx.status.replace('_', ' ')}</span></p>
                       </div>
                     </div>
-                    <button className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors shadow-sm">
+                    <button 
+                      onClick={() => handleRefill(rx._id)}
+                      className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors shadow-sm"
+                    >
                       Request Refill
                     </button>
                   </div>

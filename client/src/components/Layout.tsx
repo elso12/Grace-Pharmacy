@@ -16,6 +16,7 @@ import {
   Settings,
   LogOut,
   ShoppingBag,
+  MessageSquare
 } from 'lucide-react';
 import NotificationBell from './NotificationBell';
 import LiveChatWidget from './LiveChatWidget';
@@ -34,6 +35,7 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { path: '/admin', label: 'Dashboard', icon: <LayoutDashboard size={20} />, roles: ['ADMIN'] },
+  { path: '/admin/messages', label: 'Messages', icon: <MessageSquare size={20} />, roles: ['ADMIN', 'PHARMACIST', 'TECHNICIAN', 'CASHIER'] },
   { path: '/admin/pos', label: 'POS Terminal', icon: <ShoppingCart size={20} />, roles: ['ADMIN', 'CASHIER', 'PHARMACIST'] },
   { path: '/admin/prescriptions', label: 'Rx Queue', icon: <FileCheck size={20} />, roles: ['ADMIN', 'PHARMACIST'] },
   { path: '/admin/batch-tracker', label: 'Batch Tracker', icon: <ActivitySquare size={20} />, roles: ['ADMIN', 'PHARMACIST'] },

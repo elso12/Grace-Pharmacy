@@ -6,13 +6,31 @@ const getStatusConfig = (status: OrderResponse['status']) => {
   switch (status) {
     case 'PROCESSING':
       return { label: 'Processing', color: 'bg-amber-100 text-amber-700', icon: Clock };
-    case 'SHIPPED':
-      return { label: 'Shipped', color: 'bg-blue-100 text-blue-700', icon: Truck };
+    case 'PACKED':
+      return { label: 'Packed', color: 'bg-purple-100 text-purple-700', icon: Package };
     case 'READY_FOR_PICKUP':
       return { label: 'Ready for Pickup', color: 'bg-indigo-100 text-indigo-700', icon: Package };
-    case 'DELIVERED':
-      return { label: 'Delivered', color: 'bg-emerald-100 text-emerald-700', icon: CheckCircle2 };
+    case 'OUT_FOR_DELIVERY':
+      return { label: 'Out for Delivery', color: 'bg-blue-100 text-blue-700', icon: Truck };
+    case 'COMPLETED':
+      return { label: 'Completed', color: 'bg-emerald-100 text-emerald-700', icon: CheckCircle2 };
+    default:
+      return { label: status, color: 'bg-slate-100 text-slate-700', icon: Package };
   }
+};
+
+const ORDER_STEPS = [
+  { status: 'PENDING', label: 'Placed' },
+  { status: 'PROCESSING', label: 'Processing' },
+  { status: 'PACKED', label: 'Packed' },
+  { status: 'READY_FOR_PICKUP', label: 'Ready' }, // Or OUT_FOR_DELIVERY depending on type
+  { status: 'COMPLETED', label: 'Completed' },
+];
+
+const getStepIndex = (status: string) => {
+  const index = ORDER_STEPS.findIndex(s => s.status === status);
+  if (status === 'OUT_FOR_DELIVERY') return 3; // Treat same as ready for index
+  return index >= 0 ? index : 0;
 };
 
 const OrderHistoryPage: React.FC = () => {
@@ -74,7 +92,42 @@ const OrderHistoryPage: React.FC = () => {
                       {status.label}
                     </span>
                   </div>
-                  <div className="text-sm text-slate-500 flex flex-wrap gap-x-4 gap-y-2">
+                  
+                  {/* Visual Stepper */}
+                  {order.status !== 'COMPLETED' && order.status !== 'CANCELLED' && (
+                    <div className="mt-6 mb-4 w-full">
+                      <div className="flex items-center justify-between relative">
+                        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-1 bg-slate-100 rounded-full overflow-hidden">
+                          <div 
+                            className="h-full bg-blue-500 transition-all duration-500 ease-in-out" 
+                            style={{ width: `${(getStepIndex(order.status) / (ORDER_STEPS.length - 1)) * 100}%` }}
+                          />
+                        </div>
+                        {ORDER_STEPS.map((step, idx) => {
+                          const currentIdx = getStepIndex(order.status);
+                          const isCompleted = idx <= currentIdx;
+                          const isActive = idx === currentIdx;
+                          
+                          return (
+                            <div key={step.status} className="relative z-10 flex flex-col items-center">
+                              <div className={`w-4 h-4 sm:w-6 sm:h-6 rounded-full flex items-center justify-center transition-colors ${
+                                isCompleted ? 'bg-blue-600 text-white shadow-sm' : 'bg-slate-200 border-2 border-white'
+                              } ${isActive ? 'ring-4 ring-blue-100' : ''}`}>
+                                {isCompleted && <CheckCircle2 className="w-2.5 h-2.5 sm:w-4 sm:h-4" />}
+                              </div>
+                              <span className={`absolute top-full mt-1.5 sm:mt-2 text-[10px] sm:text-xs font-semibold text-center whitespace-nowrap ${
+                                isActive ? 'text-blue-700' : isCompleted ? 'text-slate-600' : 'text-slate-400'
+                              }`}>
+                                {step.label}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                  
+                  <div className="text-sm text-slate-500 flex flex-wrap gap-x-4 gap-y-2 mt-4">
                     <p>Placed on {new Date(order.createdAt).toLocaleDateString()}</p>
                     <span className="hidden sm:inline text-slate-300">•</span>
                     <p>{order.items?.length || 0} item{(order.items?.length || 0) !== 1 ? 's' : ''}</p>

@@ -28,15 +28,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const badge = CATEGORY_STYLES[product.category as StorefrontCategory] ?? DEFAULT_BADGE;
   const price = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(product.price);
 
-  const [rxBlocked, setRxBlocked] = useState(false);
-
   const handleAddToCart = useCallback(() => {
-    if (product.requiresPrescription) {
-      setRxBlocked(true);
-      setTimeout(() => setRxBlocked(false), 3000);
-      return;
-    }
-
     addToCart(product);
 
     // Flash the success state for 1.5 s, then revert
@@ -60,17 +52,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         Added to cart!
       </div>
 
-      {/* ── Toast notification (Rx Blocked) ─────────────────────────────────────── */}
-      <div
-        aria-live="polite"
-        aria-atomic="true"
-        className={`absolute top-0 inset-x-0 z-30 flex items-center justify-center gap-2 px-4 py-3 bg-rose-500 text-white text-xs font-semibold text-center leading-tight transition-transform duration-300 ease-out ${
-          rxBlocked ? 'translate-y-0' : '-translate-y-full'
-        }`}
-      >
-        <AlertCircle className="h-4 w-4 flex-shrink-0" />
-        Prescription Required. Upload in Patient Portal.
-      </div>
 
       {/* ── Image area ────────────────────────────────────────────────────── */}
       <div className="relative aspect-[4/3] bg-slate-50 overflow-hidden flex-shrink-0">

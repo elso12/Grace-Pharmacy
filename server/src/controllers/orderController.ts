@@ -12,7 +12,7 @@ export const createOrder = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const { items, fulfillmentType, shippingAddress, paymentMethod } = req.body;
+    const { items, fulfillmentType, shippingAddress, paymentMethod, prescriptionId, prescriptionImageUrl } = req.body;
     // Assuming `req.user.id` is available from authentication middleware
     const customerId = (req as any).user.id;
 
@@ -65,6 +65,10 @@ export const createOrder = async (
       totalAmount += fefoResult.totalCost;
     }
 
+    if (prescriptionRequired && !prescriptionId && !prescriptionImageUrl) {
+      throw new AppError('A prescription is required for one or more medications in your cart. Please upload a prescription.', 400);
+    }
+
     const order = await Order.create({
       customerId,
       items: processedItems,
@@ -103,6 +107,32 @@ export const getCustomerOrders = async (
       status: 'success',
       results: orders.length,
       data: orders,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// ─── Get Order By ID ──────────────────────────────────────────────────
+export const getOrderById = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const customerId = (req as any).user.id;
+    const { id } = req.params;
+
+    const order = await Order.findOne({ _id: id, customerId })
+      .populate('items.medicationId', 'name genericName sku requiresPrescription');
+
+    if (!order) {
+      throw new AppError('Order not found', 404);
+    }
+
+    res.status(200).json({
+      status: 'success',
+      data: order,
     });
   } catch (error) {
     next(error);

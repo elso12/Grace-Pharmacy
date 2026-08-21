@@ -17,7 +17,9 @@ import {
   approvePrescription,
   rejectPrescription,
   getPatientHistory,
-  addConsultationNote
+  addConsultationNote,
+  uploadPrescription,
+  requestRefill
 } from "../controllers/prescription.controller";
 import { protect, authorizeRoles } from "../middleware/authMiddleware";
 import { UserRole } from "../types/enums";
@@ -30,7 +32,13 @@ const router = Router();
 router.post("/safety-check", protect, validate(safetyCheckSchema, "body"), safetyCheck);
 
 // ─── GET /api/prescriptions/my-prescriptions ────────────────────────────────
-router.get("/my-prescriptions", protect, authorizeRoles(UserRole.CUSTOMER), getMyPrescriptions);
+router.get("/my-prescriptions", protect, authorizeRoles(UserRole.CUSTOMER, UserRole.ADMIN), getMyPrescriptions);
+
+// ─── POST /api/prescriptions/upload ─────────────────────────────────────────
+router.post("/upload", protect, authorizeRoles(UserRole.CUSTOMER, UserRole.ADMIN), uploadPrescription);
+
+// ─── POST /api/prescriptions/:id/refill ─────────────────────────────────────
+router.post("/:id/refill", protect, authorizeRoles(UserRole.CUSTOMER, UserRole.ADMIN), requestRefill);
 
 // ─── GET /api/prescriptions/queue ───────────────────────────────────────────
 router.get("/queue", protect, authorizeRoles(UserRole.ADMIN, UserRole.PHARMACIST), getPharmacistQueue);
