@@ -121,6 +121,7 @@ async function seedMasterDatabase() {
     // 3. Seed Medication Products
     console.log('Seeding Product Catalog...');
     const products = [
+      // ── Prescription-Only Medications ──────────────────────────────────
       {
         name: 'Amoxicillin 500mg',
         genericName: 'Amoxicillin Trihydrate',
@@ -133,36 +134,6 @@ async function seedMasterDatabase() {
         minStockThreshold: 30,
         imageUrl: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400',
         description: 'Broad-spectrum penicillin antibiotic for bacterial infections.',
-        createdAt: daysAgo(60),
-        updatedAt: now,
-      },
-      {
-        name: 'Paracetamol 500mg (Panadol)',
-        genericName: 'Acetaminophen',
-        category: 'Pain Relief',
-        form: 'Tablet',
-        strength: '500mg',
-        unitPrice: 6.0,
-        costPrice: 2.2,
-        requiresPrescription: false,
-        minStockThreshold: 50,
-        imageUrl: 'https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=400',
-        description: 'Pain reliever and fever reducer.',
-        createdAt: daysAgo(60),
-        updatedAt: now,
-      },
-      {
-        name: 'Ibuprofen 400mg (Advil)',
-        genericName: 'Ibuprofen',
-        category: 'Pain Relief',
-        form: 'Tablet',
-        strength: '400mg',
-        unitPrice: 8.75,
-        costPrice: 3.5,
-        requiresPrescription: false,
-        minStockThreshold: 40,
-        imageUrl: 'https://images.unsplash.com/photo-1550572017-edd951b55104?w=400',
-        description: 'NSAID for pain, inflammation, and fever.',
         createdAt: daysAgo(60),
         updatedAt: now,
       },
@@ -197,21 +168,6 @@ async function seedMasterDatabase() {
         updatedAt: now,
       },
       {
-        name: 'Vitamin C 1000mg + Zinc',
-        genericName: 'Ascorbic Acid & Zinc',
-        category: 'Vitamins & Supplements',
-        form: 'Effervescent Tablet',
-        strength: '1000mg',
-        unitPrice: 12.0,
-        costPrice: 4.8,
-        requiresPrescription: false,
-        minStockThreshold: 25,
-        imageUrl: 'https://images.unsplash.com/photo-1577401239170-897942555fb3?w=400',
-        description: 'Immune support supplement.',
-        createdAt: daysAgo(60),
-        updatedAt: now,
-      },
-      {
         name: 'Methotrexate 2.5mg',
         genericName: 'Methotrexate',
         category: 'Immunosuppressant',
@@ -225,18 +181,304 @@ async function seedMasterDatabase() {
         description: 'Used to treat certain types of cancer and autoimmune diseases.',
         createdAt: daysAgo(60),
         updatedAt: now,
-      }
+      },
+
+      // ── Pain Relief & Fever (OTC) ──────────────────────────────────────
+      {
+        name: 'Panadol Extra 500mg',
+        genericName: 'Paracetamol & Caffeine',
+        category: 'Pain Relief',
+        form: 'Tablet',
+        strength: '500mg/65mg',
+        unitPrice: 5.50,
+        costPrice: 2.10,
+        requiresPrescription: false,
+        minStockThreshold: 40,
+        imageUrl: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400',
+        description: 'Fast-acting relief for headaches, back pain, and fever with caffeine boost.',
+        createdAt: daysAgo(60),
+        updatedAt: now,
+      },
+      {
+        name: 'Advil Liqui-Gels 400mg',
+        genericName: 'Ibuprofen Solubilized',
+        category: 'Pain Relief',
+        form: 'Softgel',
+        strength: '400mg',
+        unitPrice: 8.95,
+        costPrice: 3.80,
+        requiresPrescription: false,
+        minStockThreshold: 35,
+        imageUrl: 'https://images.unsplash.com/photo-1550572017-edd951b55104?w=400',
+        description: 'Liquid-filled capsules for rapid absorption and long-lasting pain relief.',
+        createdAt: daysAgo(60),
+        updatedAt: now,
+      },
+      {
+        name: 'Aspirin 81mg Low Dose',
+        genericName: 'Acetylsalicylic Acid',
+        category: 'Pain Relief',
+        form: 'Enteric Coated Tablet',
+        strength: '81mg',
+        unitPrice: 6.25,
+        costPrice: 2.50,
+        requiresPrescription: false,
+        minStockThreshold: 30,
+        imageUrl: 'https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=400',
+        description: 'Enteric-coated low-dose daily aspirin for cardiovascular health and pain.',
+        createdAt: daysAgo(60),
+        updatedAt: now,
+      },
+
+      // ── Cold, Cough & Flu (OTC) ────────────────────────────────────────
+      {
+        name: 'DayQuil & NyQuil Severe Pack',
+        genericName: 'Acetaminophen, Dextromethorphan, Phenylephrine',
+        category: 'Cold & Flu',
+        form: 'Liquid Cap',
+        strength: 'Combo Pack (24ct)',
+        unitPrice: 14.50,
+        costPrice: 6.80,
+        requiresPrescription: false,
+        minStockThreshold: 25,
+        imageUrl: 'https://images.unsplash.com/photo-1576075796033-848c2a5f3696?w=400',
+        description: 'Non-drowsy daytime relief and soothing nighttime relief for multi-symptom cold and flu.',
+        createdAt: daysAgo(60),
+        updatedAt: now,
+      },
+      {
+        name: 'Strepsils Honey & Lemon Lozenges',
+        genericName: 'Dichlorobenzyl alcohol & Amylmetacresol',
+        category: 'Cold & Flu',
+        form: 'Lozenge',
+        strength: '24 Pack',
+        unitPrice: 4.75,
+        costPrice: 1.80,
+        requiresPrescription: false,
+        minStockThreshold: 50,
+        imageUrl: 'https://images.unsplash.com/photo-1584017911766-d451b3d0e843?w=400',
+        description: 'Dual antibacterial action to soothe sore throats and mouth infections.',
+        createdAt: daysAgo(60),
+        updatedAt: now,
+      },
+      {
+        name: 'Saline Nasal Mist Spray',
+        genericName: 'Sodium Chloride 0.9%',
+        category: 'Cold & Flu',
+        form: 'Nasal Spray',
+        strength: '100ml',
+        unitPrice: 7.20,
+        costPrice: 2.90,
+        requiresPrescription: false,
+        minStockThreshold: 20,
+        imageUrl: 'https://images.unsplash.com/photo-1584362917165-526a968579e8?w=400',
+        description: 'Drug-free sterile saline mist for instant dry and congested nasal relief.',
+        createdAt: daysAgo(60),
+        updatedAt: now,
+      },
+
+      // ── Allergy & Sinus Relief (OTC) ───────────────────────────────────
+      {
+        name: 'Zyrtec 24-Hour Allergy 10mg',
+        genericName: 'Cetirizine Hydrochloride',
+        category: 'Allergy',
+        form: 'Tablet',
+        strength: '10mg',
+        unitPrice: 16.80,
+        costPrice: 7.50,
+        requiresPrescription: false,
+        minStockThreshold: 30,
+        imageUrl: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400',
+        description: 'All-day prescription-strength relief from indoor and outdoor pollen and dust allergies.',
+        createdAt: daysAgo(60),
+        updatedAt: now,
+      },
+      {
+        name: 'Claritin Non-Drowsy 10mg',
+        genericName: 'Loratadine',
+        category: 'Allergy',
+        form: 'Tablet',
+        strength: '10mg',
+        unitPrice: 15.25,
+        costPrice: 6.90,
+        requiresPrescription: false,
+        minStockThreshold: 25,
+        imageUrl: 'https://images.unsplash.com/photo-1550572017-edd951b55104?w=400',
+        description: 'Provides 24-hour relief of runny nose, sneezing, itchy watery eyes, and itchy nose or throat.',
+        createdAt: daysAgo(60),
+        updatedAt: now,
+      },
+
+      // ── Digestive Health (OTC) ─────────────────────────────────────────
+      {
+        name: 'Prilosec OTC 20mg',
+        genericName: 'Omeprazole Magnesium',
+        category: 'Digestive Health',
+        form: 'Delayed-Release Capsule',
+        strength: '20mg',
+        unitPrice: 19.95,
+        costPrice: 9.00,
+        requiresPrescription: false,
+        minStockThreshold: 20,
+        imageUrl: 'https://images.unsplash.com/photo-1471864190281-a93a3070b6de?w=400',
+        description: '24-hour frequent heartburn protection that shuts down stomach acid pumps.',
+        createdAt: daysAgo(60),
+        updatedAt: now,
+      },
+      {
+        name: 'Tums Ultra Strength 1000',
+        genericName: 'Calcium Carbonate',
+        category: 'Digestive Health',
+        form: 'Chewable Tablet',
+        strength: '1000mg',
+        unitPrice: 6.80,
+        costPrice: 2.60,
+        requiresPrescription: false,
+        minStockThreshold: 40,
+        imageUrl: 'https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=400',
+        description: 'Fast-acting chewable antacid for immediate acid indigestion and upset stomach relief.',
+        createdAt: daysAgo(60),
+        updatedAt: now,
+      },
+      {
+        name: 'Hydration Electrolyte Powder Packets',
+        genericName: 'Oral Rehydration Salts',
+        category: 'Digestive Health',
+        form: 'Powder Sachet (16 Pack)',
+        strength: 'Multi-flavor',
+        unitPrice: 11.50,
+        costPrice: 4.50,
+        requiresPrescription: false,
+        minStockThreshold: 30,
+        imageUrl: 'https://images.unsplash.com/photo-1577401239170-897942555fb3?w=400',
+        description: 'Cellular hydration multiplier designed for rapid rehydration and recovery.',
+        createdAt: daysAgo(60),
+        updatedAt: now,
+      },
+
+      // ── Vitamins & Supplements (OTC) ───────────────────────────────────
+      {
+        name: 'Vitamin C 1000mg + Zinc & Elderberry',
+        genericName: 'Ascorbic Acid & Zinc',
+        category: 'Vitamins',
+        form: 'Effervescent Tablet',
+        strength: '1000mg',
+        unitPrice: 12.00,
+        costPrice: 4.80,
+        requiresPrescription: false,
+        minStockThreshold: 35,
+        imageUrl: 'https://images.unsplash.com/photo-1577401239170-897942555fb3?w=400',
+        description: 'Triple-action immune defense effervescent drink tablets with high bio-availability.',
+        createdAt: daysAgo(60),
+        updatedAt: now,
+      },
+      {
+        name: 'Vitamin D3 5000 IU High Potency',
+        genericName: 'Cholecalciferol',
+        category: 'Vitamins',
+        form: 'Softgel',
+        strength: '5000 IU',
+        unitPrice: 10.50,
+        costPrice: 4.00,
+        requiresPrescription: false,
+        minStockThreshold: 30,
+        imageUrl: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400',
+        description: 'Essential sunshine vitamin for bone density, calcium absorption, and mood support.',
+        createdAt: daysAgo(60),
+        updatedAt: now,
+      },
+      {
+        name: 'Omega-3 Fish Oil 1200mg',
+        genericName: 'EPA / DHA Fatty Acids',
+        category: 'Vitamins',
+        form: 'Softgel',
+        strength: '1200mg (360mg Active Omega-3)',
+        unitPrice: 18.00,
+        costPrice: 7.20,
+        requiresPrescription: false,
+        minStockThreshold: 25,
+        imageUrl: 'https://images.unsplash.com/photo-1550572017-edd951b55104?w=400',
+        description: 'Purified wild fish oil softgels supporting heart, brain, and joint mobility.',
+        createdAt: daysAgo(60),
+        updatedAt: now,
+      },
+
+      // ── First Aid & Medical Devices (OTC) ──────────────────────────────
+      {
+        name: 'Fast-Read Digital Oral Thermometer',
+        genericName: 'Medical Thermometer',
+        category: 'First Aid',
+        form: 'Medical Device',
+        strength: '10-Second Read',
+        unitPrice: 12.99,
+        costPrice: 5.00,
+        requiresPrescription: false,
+        minStockThreshold: 20,
+        imageUrl: 'https://images.unsplash.com/photo-1584362917165-526a968579e8?w=400',
+        description: 'Clinical grade waterproof fever thermometer with beeper and memory recall.',
+        createdAt: daysAgo(60),
+        updatedAt: now,
+      },
+      {
+        name: 'Band-Aid Flexible Fabric Bandages',
+        genericName: 'Sterile Adhesive Strips',
+        category: 'First Aid',
+        form: 'Box of 100',
+        strength: 'Assorted Sizes',
+        unitPrice: 7.50,
+        costPrice: 2.80,
+        requiresPrescription: false,
+        minStockThreshold: 45,
+        imageUrl: 'https://images.unsplash.com/photo-1584017911766-d451b3d0e843?w=400',
+        description: 'Memory-weave fabric stretches with movement for minor cuts, scrapes, and burns.',
+        createdAt: daysAgo(60),
+        updatedAt: now,
+      },
+      {
+        name: 'Hydrocortisone 1% Max Anti-Itch Cream',
+        genericName: 'Hydrocortisone 1%',
+        category: 'First Aid',
+        form: 'Topical Cream',
+        strength: '2oz Tube',
+        unitPrice: 6.95,
+        costPrice: 2.50,
+        requiresPrescription: false,
+        minStockThreshold: 30,
+        imageUrl: 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400',
+        description: 'Maximum strength soothing relief for eczema, insect bites, poison ivy, and rashes.',
+        createdAt: daysAgo(60),
+        updatedAt: now,
+      },
     ];
     const productResult = await db.collection('products').insertMany(products);
     const productIds = Object.values(productResult.insertedIds);
     console.log(` Created ${productResult.insertedCount} products.`);
 
-    // 4. Seed FEFO Inventory Batches (Staggered Expirations)
+    // 4. Seed FEFO Inventory Batches (one generous batch per product + FEFO test batches)
     console.log('Seeding FEFO Inventory Batches...');
-    const batches = [
-      // Amoxicillin - Batch 1: Near expiry (<30 days -> FEFO priority #1)
+    const batchPrefixes = [
+      'AMX', 'LIP', 'VEN', 'MTX',
+      'PAN', 'ADV', 'ASP',
+      'DQN', 'STP', 'SAL',
+      'ZYR', 'CLR',
+      'PRI', 'TUM', 'HYD',
+      'VTC', 'VTD', 'OMG',
+      'THR', 'BND', 'HCC',
+    ];
+    const batches: any[] = products.map((p, i) => ({
+      productId: productIds[i],
+      batchNumber: `${batchPrefixes[i] || 'GEN'}-2026-${(i + 1).toString().padStart(3, '0')}`,
+      quantity: 50 + Math.floor(Math.random() * 101), // 50–150 units
+      costPrice: p.costPrice,
+      expiryDate: daysFuture(200 + Math.floor(Math.random() * 400)), // 200–600 days out
+      shelfLocation: `Aisle ${(i % 5) + 1}, Shelf ${String.fromCharCode(65 + (i % 4))}, Bin ${(i + 1).toString().padStart(2, '0')}`,
+      status: 'ACTIVE',
+      createdAt: daysAgo(Math.floor(Math.random() * 30) + 1),
+    }));
+    // Add two near-expiry FEFO test batches for pharmacist alerts
+    batches.push(
       {
-        productId: productIds[0],
+        productId: productIds[0], // Amoxicillin near-expiry
         batchNumber: 'AMX-2026-EXP-SOON',
         quantity: 15,
         costPrice: 8.5,
@@ -245,75 +487,19 @@ async function seedMasterDatabase() {
         status: 'ACTIVE',
         createdAt: daysAgo(30),
       },
-      // Amoxicillin - Batch 2: Fresh batch
       {
-        productId: productIds[0],
-        batchNumber: 'AMX-2026-FRESH',
-        quantity: 120,
-        costPrice: 8.5,
-        expiryDate: daysFuture(450),
-        shelfLocation: 'Aisle 1, Shelf A, Bin 05',
-        status: 'ACTIVE',
-        createdAt: daysAgo(10),
-      },
-      // Paracetamol
-      {
-        productId: productIds[1],
-        batchNumber: 'PAN-2026-01',
-        quantity: 180,
-        costPrice: 2.2,
-        expiryDate: daysFuture(500),
-        shelfLocation: 'Aisle 2, Shelf B, Bin 12',
-        status: 'ACTIVE',
-        createdAt: daysAgo(15),
-      },
-      // Ibuprofen - Warning batch (<60 days)
-      {
-        productId: productIds[2],
-        batchNumber: 'IBU-2026-WARN',
-        quantity: 25,
-        costPrice: 3.5,
+        productId: productIds[5], // Advil warning batch
+        batchNumber: 'ADV-2026-WARN',
+        quantity: 20,
+        costPrice: 3.80,
         expiryDate: daysFuture(50),
         shelfLocation: 'Aisle 2, Shelf C, Bin 03',
         status: 'ACTIVE',
         createdAt: daysAgo(20),
       },
-      // Lipitor
-      {
-        productId: productIds[3],
-        batchNumber: 'LIP-2026-88',
-        quantity: 50,
-        costPrice: 16.0,
-        expiryDate: daysFuture(320),
-        shelfLocation: 'Aisle 3, Shelf A, Bin 01',
-        status: 'ACTIVE',
-        createdAt: daysAgo(12),
-      },
-      // Ventolin
-      {
-        productId: productIds[4],
-        batchNumber: 'VEN-2026-02',
-        quantity: 35,
-        costPrice: 21.0,
-        expiryDate: daysFuture(280),
-        shelfLocation: 'Aisle 4, Shelf D, Bin 08',
-        status: 'ACTIVE',
-        createdAt: daysAgo(8),
-      },
-      // Vitamin C
-      {
-        productId: productIds[5],
-        batchNumber: 'VIT-2026-77',
-        quantity: 90,
-        costPrice: 4.8,
-        expiryDate: daysFuture(600),
-        shelfLocation: 'Aisle 5, Shelf A, Bin 10',
-        status: 'ACTIVE',
-        createdAt: daysAgo(5),
-      }
-    ];
+    );
     await db.collection('inventorybatches').insertMany(batches);
-    console.log(' Created 7 FEFO-staggered inventory batches.');
+    console.log(` Created ${batches.length} FEFO-staggered inventory batches.`);
 
     // 4.5 Seed Customers (Patients)
     console.log('Seeding Customers/Patients...');
@@ -360,7 +546,7 @@ async function seedMasterDatabase() {
         doctorLicenseNumber: 'MD-77281',
         medications: [
           { product: { _id: productIds[0], name: 'Amoxicillin 500mg' }, name: 'Amoxicillin 500mg', dosage: '500mg', frequency: '3 times daily', duration: '7 days', quantity: 21 },
-          { product: { _id: productIds[6], name: 'Methotrexate 2.5mg' }, name: 'Methotrexate 2.5mg', dosage: '2.5mg', frequency: 'Once weekly', duration: '30 days', quantity: 10 },
+          { product: { _id: productIds[3], name: 'Methotrexate 2.5mg' }, name: 'Methotrexate 2.5mg', dosage: '2.5mg', frequency: 'Once weekly', duration: '30 days', quantity: 10 },
         ],
         prescriptionImageUrl: 'https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?w=600',
         status: 'PENDING_VERIFICATION',
@@ -377,8 +563,8 @@ async function seedMasterDatabase() {
         doctorName: 'Dr. Emily Alva, MD',
         doctorLicenseNumber: 'MD-90412',
         medications: [
-          { product: { _id: productIds[4], name: 'Ventolin HFA Inhaler' }, name: 'Ventolin HFA Inhaler', dosage: '90mcg', frequency: '2 puffs every 4-6 hours', duration: '30 days', quantity: 1 },
-          { product: { _id: productIds[1], name: 'Paracetamol 500mg' }, name: 'Paracetamol 500mg', dosage: '500mg', frequency: 'Every 6 hours PRN', duration: '5 days', quantity: 20 },
+          { product: { _id: productIds[2], name: 'Ventolin HFA Inhaler' }, name: 'Ventolin HFA Inhaler', dosage: '90mcg', frequency: '2 puffs every 4-6 hours', duration: '30 days', quantity: 1 },
+          { product: { _id: productIds[4], name: 'Panadol Extra 500mg' }, name: 'Panadol Extra 500mg', dosage: '500mg', frequency: 'Every 6 hours PRN', duration: '5 days', quantity: 20 },
         ],
         prescriptionImageUrl: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=600',
         status: 'APPROVED',
@@ -405,7 +591,7 @@ async function seedMasterDatabase() {
         doctorName: 'Dr. Sarah Adams, MD',
         doctorLicenseNumber: 'MD-44109',
         medications: [
-          { product: { _id: productIds[3], name: 'Lipitor 20mg' }, name: 'Lipitor 20mg', dosage: '20mg', frequency: 'Once daily at bedtime', duration: '90 days', quantity: 90 },
+          { product: { _id: productIds[1], name: 'Lipitor 20mg' }, name: 'Lipitor 20mg', dosage: '20mg', frequency: 'Once daily at bedtime', duration: '90 days', quantity: 90 },
         ],
         prescriptionDate: daysAgo(4),
         status: 'PREPARED',
@@ -437,8 +623,8 @@ async function seedMasterDatabase() {
         cashierName: 'Elena Gomez',
         customerName: 'Walk-in Customer',
         items: [
-          { product: productIds[1], productName: 'Paracetamol 500mg', quantity: 2, unitPrice: 6.0, lineTotal: 12.0 },
-          { product: productIds[5], productName: 'Vitamin C 1000mg + Zinc', quantity: 1, unitPrice: 12.0, lineTotal: 12.0 },
+          { product: productIds[4], productName: 'Panadol Extra 500mg', quantity: 2, unitPrice: 5.50, lineTotal: 11.0 },
+          { product: productIds[15], productName: 'Vitamin C 1000mg + Zinc & Elderberry', quantity: 1, unitPrice: 12.0, lineTotal: 12.0 },
         ],
         subtotal: 24.0,
         taxAmount: 1.92,
@@ -459,8 +645,8 @@ async function seedMasterDatabase() {
         cashierName: 'Elena Gomez',
         customerName: 'John Doe',
         items: [
-          { product: productIds[2], productName: 'Ibuprofen 400mg', quantity: 2, unitPrice: 8.75, lineTotal: 17.5 },
-          { product: productIds[4], productName: 'Ventolin HFA Inhaler', quantity: 1, unitPrice: 42.5, lineTotal: 42.5 },
+          { product: productIds[5], productName: 'Advil Liqui-Gels 400mg', quantity: 2, unitPrice: 8.95, lineTotal: 17.90 },
+          { product: productIds[2], productName: 'Ventolin HFA Inhaler', quantity: 1, unitPrice: 42.5, lineTotal: 42.5 },
         ],
         subtotal: 60.0,
         taxAmount: 4.8,
@@ -478,7 +664,7 @@ async function seedMasterDatabase() {
         cashierName: 'Elena Gomez',
         customerName: 'Jane Smith',
         items: [
-          { product: productIds[3], productName: 'Lipitor 20mg', quantity: 1, unitPrice: 34.0, lineTotal: 34.0 },
+          { product: productIds[1], productName: 'Lipitor 20mg', quantity: 1, unitPrice: 34.0, lineTotal: 34.0 },
         ],
         subtotal: 34.0,
         taxAmount: 2.72,
@@ -499,8 +685,8 @@ async function seedMasterDatabase() {
         branchId: userIds[0], // fallback
         customerId: userIds[4], // John Doe
         items: [
-          { medicationId: productIds[1], quantity: 1, priceAtPurchase: 6.0 },
-          { medicationId: productIds[4], quantity: 1, priceAtPurchase: 42.5 }
+          { medicationId: productIds[4], quantity: 1, priceAtPurchase: 5.50 },
+          { medicationId: productIds[2], quantity: 1, priceAtPurchase: 42.5 }
         ],
         totalAmount: 48.5,
         status: 'PREPARED',
@@ -517,7 +703,7 @@ async function seedMasterDatabase() {
         branchId: userIds[0],
         customerId: userIds[4],
         items: [
-          { medicationId: productIds[2], quantity: 2, priceAtPurchase: 8.75 }
+          { medicationId: productIds[5], quantity: 2, priceAtPurchase: 8.95 }
         ],
         totalAmount: 17.5,
         status: 'COMPLETED',
