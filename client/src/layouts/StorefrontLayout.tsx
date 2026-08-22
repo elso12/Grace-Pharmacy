@@ -1,6 +1,6 @@
 import React from 'react';
 import { Outlet, Link, useNavigate } from 'react-router-dom';
-import { Search, ShoppingCart, User, Pill, Activity, Baby, Heart, LayoutDashboard, Package, MessageSquare } from 'lucide-react';
+import { Search, ShoppingCart, User, Pill, Activity, Heart, LayoutDashboard, Package, MessageSquare, Thermometer, Shield, HeartPulse } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import NotificationBell from '../components/NotificationBell';
@@ -9,10 +9,12 @@ import { UserProfileDropdown } from '../components/layout/UserProfileDropdown';
 
 // Category hrefs must match exact StorefrontCategory enum values used by the API
 const categories = [
-  { name: 'Vitamins',      icon: Pill,     href: '/catalog?category=Vitamins'     },
-  { name: 'Pain Relief',   icon: Activity, href: '/catalog?category=Pain+Relief'  },
-  { name: 'Allergy',       icon: Heart,    href: '/catalog?category=Allergy'       },
-  { name: 'Mother & Baby', icon: Baby,     href: '/catalog?category=Mother+%26+Baby' },
+  { name: 'Pain Relief',      icon: Activity,    href: '/catalog?category=Pain+Relief'  },
+  { name: 'Cold & Flu',       icon: Thermometer, href: '/catalog?category=Cold+%26+Flu' },
+  { name: 'Allergy',          icon: Heart,       href: '/catalog?category=Allergy'       },
+  { name: 'Digestive Health', icon: HeartPulse,  href: '/catalog?category=Digestive+Health' },
+  { name: 'Vitamins',         icon: Pill,        href: '/catalog?category=Vitamins'     },
+  { name: 'First Aid',        icon: Shield,      href: '/catalog?category=First+Aid'    },
 ];
 
 /** Staff roles that have access to the admin panel. */

@@ -11,11 +11,13 @@ import ProductCard from '../../components/Storefront/ProductCard';
 
 // ── Category sidebar config ───────────────────────────────────────────────────
 const CATEGORY_ICONS: Record<StorefrontCategory, string> = {
-  'Vitamins':      '💊',
-  'Pain Relief':   '🩹',
-  'Allergy':       '🌿',
-  'First Aid':     '🩺',
-  'Mother & Baby': '🍼',
+  'Pain Relief':     '🩹',
+  'Cold & Flu':      '🤧',
+  'Allergy':         '🌿',
+  'Digestive Health': '💚',
+  'Vitamins':        '💊',
+  'First Aid':       '🩺',
+  'Mother & Baby':   '🍼',
 };
 
 // ── Skeleton card ─────────────────────────────────────────────────────────────

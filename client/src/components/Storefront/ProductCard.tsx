@@ -5,11 +5,13 @@ import { useCart } from '../../context/CartContext';
 
 // ── Category badge config ─────────────────────────────────────────────────────
 const CATEGORY_STYLES: Record<StorefrontCategory, { bg: string; text: string; dot: string }> = {
-  'Vitamins':      { bg: 'bg-emerald-50', text: 'text-emerald-700', dot: 'bg-emerald-500' },
-  'Pain Relief':   { bg: 'bg-orange-50',  text: 'text-orange-700',  dot: 'bg-orange-500'  },
-  'Allergy':       { bg: 'bg-purple-50',  text: 'text-purple-700',  dot: 'bg-purple-500'  },
-  'First Aid':     { bg: 'bg-red-50',     text: 'text-red-700',     dot: 'bg-red-500'     },
-  'Mother & Baby': { bg: 'bg-pink-50',    text: 'text-pink-700',    dot: 'bg-pink-500'    },
+  'Pain Relief':      { bg: 'bg-orange-50',  text: 'text-orange-700',  dot: 'bg-orange-500'  },
+  'Cold & Flu':       { bg: 'bg-sky-50',     text: 'text-sky-700',     dot: 'bg-sky-500'     },
+  'Allergy':          { bg: 'bg-purple-50',  text: 'text-purple-700',  dot: 'bg-purple-500'  },
+  'Digestive Health': { bg: 'bg-teal-50',    text: 'text-teal-700',    dot: 'bg-teal-500'    },
+  'Vitamins':         { bg: 'bg-emerald-50', text: 'text-emerald-700', dot: 'bg-emerald-500' },
+  'First Aid':        { bg: 'bg-red-50',     text: 'text-red-700',     dot: 'bg-red-500'     },
+  'Mother & Baby':    { bg: 'bg-pink-50',    text: 'text-pink-700',    dot: 'bg-pink-500'    },
 };
 
 const DEFAULT_BADGE = { bg: 'bg-slate-50', text: 'text-slate-600', dot: 'bg-slate-400' };

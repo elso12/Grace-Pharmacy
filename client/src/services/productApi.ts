@@ -31,12 +31,16 @@ export type StorefrontCategory =
   | 'Pain Relief'
   | 'Allergy'
   | 'First Aid'
+  | 'Cold & Flu'
+  | 'Digestive Health'
   | 'Mother & Baby';
 
 export const STOREFRONT_CATEGORIES: StorefrontCategory[] = [
-  'Vitamins',
   'Pain Relief',
+  'Cold & Flu',
   'Allergy',
+  'Digestive Health',
+  'Vitamins',
   'First Aid',
   'Mother & Baby',
 ];
@@ -66,7 +70,7 @@ export const getAllProducts = async (
   search?:               string,
   requiresPrescription?: boolean,
 ): Promise<Product[]> => {
-  const params: Record<string, string> = {};
+  const params: Record<string, string> = { limit: '100' };
 
   if (category)                          params.category             = category;
   if (search && search.trim())           params.search               = search.trim();
