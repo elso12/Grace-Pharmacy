@@ -1,4 +1,5 @@
 import React, { useState, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ShoppingCart, AlertCircle, ImageOff, Check } from 'lucide-react';
 import type { Product, StorefrontCategory } from '../../services/productApi';
 import { useCart } from '../../context/CartContext';
@@ -22,6 +23,7 @@ interface ProductCardProps {
 
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const { addToCart } = useCart();
+  const navigate = useNavigate();
 
   const [imgError,  setImgError]  = useState(false);
   // `added` drives the brief "Added ✓" feedback state
@@ -39,7 +41,10 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   }, [addToCart, product]);
 
   return (
-    <article className="group relative flex flex-col bg-white rounded-2xl border border-slate-200 overflow-hidden hover:shadow-xl hover:border-blue-200 transition-all duration-300 hover:-translate-y-0.5">
+    <article
+      onClick={() => navigate(`/product/${product._id}`)}
+      className="group relative flex flex-col bg-white rounded-2xl border border-slate-200 overflow-hidden hover:shadow-xl hover:border-blue-200 transition-all duration-300 hover:-translate-y-0.5 cursor-pointer"
+    >
 
       {/* ── Toast notification (Success) ────────────────────────────────────────────── */}
       {/* Slides down from the top of the card for 1.5 s then disappears    */}
@@ -112,7 +117,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
           <button
             id={`add-to-cart-${product._id}`}
-            onClick={handleAddToCart}
+            onClick={(e) => { e.stopPropagation(); handleAddToCart(); }}
             aria-label={`Add ${product.name} to cart`}
             disabled={added}
             className={`inline-flex items-center gap-1.5 px-4 py-2 text-sm font-bold rounded-xl transition-all duration-200 shadow-sm ${

@@ -16,7 +16,9 @@ import {
   Settings,
   LogOut,
   ShoppingBag,
-  MessageSquare
+  MessageSquare,
+  Truck,
+  ClipboardCheck
 } from 'lucide-react';
 import NotificationBell from './NotificationBell';
 import LiveChatWidget from './LiveChatWidget';
@@ -34,10 +36,11 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { path: '/admin', label: 'Dashboard', icon: <LayoutDashboard size={20} />, roles: ['ADMIN'] },
+  { path: '/admin', label: 'Dashboard', icon: <LayoutDashboard size={20} />, roles: ['ADMIN', 'PHARMACIST', 'TECHNICIAN', 'CASHIER'] },
   { path: '/admin/messages', label: 'Messages', icon: <MessageSquare size={20} />, roles: ['ADMIN', 'PHARMACIST', 'TECHNICIAN', 'CASHIER'] },
   { path: '/admin/pos', label: 'POS Terminal', icon: <ShoppingCart size={20} />, roles: ['ADMIN', 'CASHIER', 'PHARMACIST'] },
   { path: '/admin/prescriptions', label: 'Rx Queue', icon: <FileCheck size={20} />, roles: ['ADMIN', 'PHARMACIST'] },
+  { path: '/admin/approval-queue', label: 'Approval Queue', icon: <ClipboardCheck size={20} />, roles: ['ADMIN', 'PHARMACIST'] },
   { path: '/admin/batch-tracker', label: 'Batch Tracker', icon: <ActivitySquare size={20} />, roles: ['ADMIN', 'PHARMACIST'] },
   { path: '/admin/patient-history', label: 'Patient History', icon: <Users size={20} />, roles: ['ADMIN', 'PHARMACIST'] },
   { path: '/admin/pick-list', label: 'Pick List Queue', icon: <FileCheck size={20} />, roles: ['ADMIN', 'PHARMACIST', 'TECHNICIAN'] },
@@ -47,8 +50,10 @@ const navItems: NavItem[] = [
   { path: '/admin/inventory', label: 'Inventory', icon: <Package size={20} />, roles: ['ADMIN', 'PHARMACIST'] },
   { path: '/admin/reports', label: 'Reports', icon: <TrendingUp size={20} />, roles: ['ADMIN'] },
   { path: '/admin/orders', label: 'Orders', icon: <ShoppingBag size={20} />, roles: ['ADMIN', 'PHARMACIST', 'TECHNICIAN'] },
+  { path: '/admin/suppliers', label: 'Suppliers', icon: <Truck size={20} />, roles: ['ADMIN'] },
   { path: '/admin/users', label: 'Users & Roles', icon: <Users size={20} />, roles: ['ADMIN'] },
   { path: '/admin/audit', label: 'Audit Logs', icon: <Settings size={20} />, roles: ['ADMIN'] },
+  { path: '/admin/settings', label: 'Settings', icon: <Settings size={20} />, roles: ['ADMIN'] },
 ];
 
 /* ── Layout ─────────────────────────────────────────────────────────── */

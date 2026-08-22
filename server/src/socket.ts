@@ -57,3 +57,81 @@ export const getIO = () => {
   }
   return io;
 };
+
+// ─── Notification Emitters ──────────────────────────────────────────────────
+// Call these from controllers or services to push real-time notifications.
+
+/**
+ * Emit a low stock alert to all connected admin/staff clients
+ */
+export const emitLowStockAlert = (data: {
+  productName: string;
+  currentStock: number;
+  reorderLevel: number;
+}) => {
+  try {
+    const socket = getIO();
+    socket.emit('low_stock_alert', data);
+    socket.emit('notification_push', {
+      title: 'Low Stock Alert',
+      message: `${data.productName} is below reorder level (${data.currentStock} remaining)`,
+      type: 'low_stock',
+    });
+  } catch {
+    // Socket not initialized yet — skip silently during startup
+  }
+};
+
+/**
+ * Emit an expiry warning to all connected admin/staff clients
+ */
+export const emitExpiryAlert = (data: {
+  productName: string;
+  batchNumber: string;
+  daysUntilExpiry: number;
+}) => {
+  try {
+    const socket = getIO();
+    socket.emit('expiry_alert', data);
+    socket.emit('notification_push', {
+      title: 'Expiry Warning',
+      message: `Batch ${data.batchNumber} of ${data.productName} expires in ${data.daysUntilExpiry} days`,
+      type: 'expiring',
+    });
+  } catch {
+    // Socket not initialized yet
+  }
+};
+
+/**
+ * Emit a new order notification to all connected staff clients
+ */
+export const emitNewOrder = (data: {
+  orderId: string;
+  customerName?: string;
+  totalAmount: number;
+}) => {
+  try {
+    const socket = getIO();
+    socket.emit('new_order', data);
+    socket.emit('notification_push', {
+      title: 'New Order Received',
+      message: `Order #${data.orderId?.slice(-6).toUpperCase()} — $${data.totalAmount.toFixed(2)}`,
+      type: 'order',
+    });
+  } catch {
+    // Socket not initialized yet
+  }
+};
+
+/**
+ * Emit a generic notification
+ */
+export const emitNotification = (title: string, message: string, type: string = 'general') => {
+  try {
+    const socket = getIO();
+    socket.emit('notification_push', { title, message, type });
+  } catch {
+    // Socket not initialized yet
+  }
+};

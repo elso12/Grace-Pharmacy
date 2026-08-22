@@ -16,6 +16,7 @@ import { Toaster } from 'react-hot-toast';
 import StorefrontLayout from './layouts/StorefrontLayout';
 import HomePage from './pages/Storefront/HomePage';
 import ProductCatalog from './pages/Storefront/ProductCatalog';
+import ProductDetailPage from './pages/Storefront/ProductDetailPage';
 import CheckoutPage from './pages/Storefront/CheckoutPage';
 import OrderHistoryPage from './pages/Customer/OrderHistoryPage';
 import PatientPortal from './pages/Customer/PatientPortal';
@@ -29,15 +30,24 @@ import UsersPage from './pages/Admin/UsersPage';
 import AuditLogPage from './pages/Admin/AuditLogPage';
 import ReportsPage from './pages/Admin/ReportsPage';
 import OrdersPage from './pages/Admin/OrdersPage';
+import SuppliersPage from './pages/Admin/SuppliersPage';
+import SettingsPage from './pages/Admin/SettingsPage';
 
 // Pharmacist Pages
 import PrescriptionQueuePage from './pages/Pharmacist/PrescriptionQueuePage';
 import BatchTrackerPage from './pages/Pharmacist/BatchTrackerPage';
 import PatientHistoryPage from './pages/Pharmacist/PatientHistoryPage';
+import PharmacistDashboard from './pages/Admin/PharmacistDashboard';
+import PharmacistQueue from './pages/Admin/PharmacistQueue';
 
+// Cashier Pages
+import CashierDashboard from './pages/Cashier/CashierDashboard';
+
+// Technician Pages
 import PickListQueue from './pages/Technician/PickListQueue';
 import CycleCountForm from './pages/Technician/CycleCountForm';
 import ShelfDirectory from './pages/Technician/ShelfDirectory';
+import TechnicianDashboard from './pages/Technician/TechnicianDashboard';
 
 
 
@@ -51,6 +61,7 @@ const App: React.FC = () => (
           <Route element={<StorefrontLayout />}>
             <Route path="/" element={<HomePage />} />
             <Route path="/catalog" element={<ProductCatalog />} />
+            <Route path="/product/:id" element={<ProductDetailPage />} />
             <Route path="/checkout" element={<CheckoutPage />} />
             
             {/* Customer-only route inside the storefront layout */}
@@ -71,39 +82,65 @@ const App: React.FC = () => (
           <Route path="/admin" element={<ProtectedRoute allowedRoles={['ADMIN', 'PHARMACIST', 'TECHNICIAN', 'CASHIER']} />}>
             <Route element={<Layout />}>
               
-              {/* Common Manager/Staff Pages */}
+              {/* ── Role-Specific Dashboards (index route) ──────────────── */}
+              {/* Admin dashboard */}
+              <Route element={<ProtectedRoute allowedRoles={['ADMIN']} />}>
+                <Route index                element={<AdminDashboard />} />
+                <Route path="dashboard"     element={<AdminDashboard />} />
+              </Route>
+
+              {/* Pharmacist dashboard */}
+              <Route element={<ProtectedRoute allowedRoles={['PHARMACIST']} />}>
+                <Route index                element={<PharmacistDashboard />} />
+                <Route path="dashboard"     element={<PharmacistDashboard />} />
+              </Route>
+
+              {/* Cashier dashboard */}
+              <Route element={<ProtectedRoute allowedRoles={['CASHIER']} />}>
+                <Route index                element={<CashierDashboard />} />
+                <Route path="dashboard"     element={<CashierDashboard />} />
+              </Route>
+
+              {/* Technician dashboard */}
+              <Route element={<ProtectedRoute allowedRoles={['TECHNICIAN']} />}>
+                <Route index                element={<TechnicianDashboard />} />
+                <Route path="dashboard"     element={<TechnicianDashboard />} />
+              </Route>
+
+              {/* ── Common Manager/Staff Pages (Pharmacist + Admin) ────── */}
               <Route element={<ProtectedRoute allowedRoles={['PHARMACIST', 'ADMIN']} />}>
-                <Route path="prescriptions" element={<PrescriptionQueuePage />} />
-                <Route path="batch-tracker" element={<BatchTrackerPage />} />
-                <Route path="patient-history" element={<PatientHistoryPage />} />
+                <Route path="prescriptions"   element={<PrescriptionQueuePage />} />
+                <Route path="batch-tracker"    element={<BatchTrackerPage />} />
+                <Route path="patient-history"  element={<PatientHistoryPage />} />
+                <Route path="approval-queue"   element={<PharmacistQueue />} />
               </Route>
 
               {/* Universal Staff Pages */}
               <Route path="messages" element={<MessagesPage />} />
 
-              {/* Technician / Staff Pages */}
+              {/* ── Technician / Staff Pages ────────────────────────────── */}
               <Route element={<ProtectedRoute allowedRoles={['TECHNICIAN', 'PHARMACIST', 'ADMIN']} />}>
                 <Route path="pick-list" element={<PickListQueue />} />
                 <Route path="cycle-count" element={<CycleCountForm />} />
                 <Route path="shelf-directory" element={<ShelfDirectory />} />
               </Route>
               
-              {/* POS Page — restricted to cashiers, pharmacists, and admins */}
+              {/* ── POS Page — restricted to cashiers, pharmacists, and admins ── */}
               <Route element={<ProtectedRoute allowedRoles={['CASHIER', 'PHARMACIST', 'ADMIN']} />}>
                 <Route path="pos" element={<POSPage />} />
                 <Route path="pos/shift-close" element={<ShiftClosePage />} />
               </Route>
 
-              {/* Strict Admin Pages */}
+              {/* ── Strict Admin Pages ──────────────────────────────────── */}
               <Route element={<ProtectedRoute allowedRoles={['ADMIN']} />}>
-                <Route index                element={<AdminDashboard />} />
-                <Route path="dashboard"     element={<AdminDashboard />} />
                 <Route path="products"      element={<ProductsPage />} />
                 <Route path="inventory"     element={<InventoryFEFOPage />} />
                 <Route path="users"         element={<UsersPage />} />
                 <Route path="orders"        element={<OrdersPage />} />
                 <Route path="audit"         element={<AuditLogPage />} />
                 <Route path="reports"       element={<ReportsPage />} />
+                <Route path="suppliers"     element={<SuppliersPage />} />
+                <Route path="settings"      element={<SettingsPage />} />
               </Route>
             </Route>
           </Route>
@@ -114,4 +151,3 @@ const App: React.FC = () => (
 );
 
 export default App;
-

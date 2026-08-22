@@ -33,11 +33,9 @@ import saleRoutes from "./saleRoutes";
 // ─── Sale Routes (POS Checkout) ───────────────────────────────────────────────
 export const saleRouter = saleRoutes;
 
-// ─── Supplier Routes ────────────────────────────────────────────────────────
-export const supplierRouter = Router();
-supplierRouter.get("/", (_req, res) => {
-  res.json({ message: "Supplier routes — coming soon" });
-});
+// ─── Supplier Routes (FULLY IMPLEMENTED) ────────────────────────────────────
+import supplierRoutes from "./supplierRoutes";
+export const supplierRouter = supplierRoutes;
 
 // ─── Audit Routes ───────────────────────────────────────────────────────────
 import auditRoutes from "./auditRoutes";
