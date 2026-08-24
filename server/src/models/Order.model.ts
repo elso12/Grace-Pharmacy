@@ -130,9 +130,9 @@ const orderSchema = new Schema<IOrder>(
   }
 );
 
-orderSchema.index({ customerId: 1 });
+// Compound index: "all orders for customer X, newest first" in a single index scan
+orderSchema.index({ customerId: 1, createdAt: -1 });
 orderSchema.index({ status: 1 });
-orderSchema.index({ createdAt: -1 });
 
 const Order: Model<IOrder> = mongoose.model<IOrder>('Order', orderSchema);
 

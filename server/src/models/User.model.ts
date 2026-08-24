@@ -112,7 +112,7 @@ userSchema.methods.comparePassword = async function (candidatePassword: string):
   return await bcrypt.compare(candidatePassword, this.password as string);
 };
 
-// userSchema.index({ email: 1 }, { unique: true });
+userSchema.index({ email: 1 }, { unique: true });
 userSchema.index({ role: 1, isActive: 1 });
 userSchema.index({ licenseNumber: 1 }, { sparse: true });
 

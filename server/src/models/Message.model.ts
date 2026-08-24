@@ -39,5 +39,8 @@ const messageSchema = new Schema<IMessage>(
   }
 );
 
+// Compound index: efficient "messages in conversation X, ordered by time" queries
+messageSchema.index({ conversationId: 1, createdAt: 1 });
+
 const Message = mongoose.model<IMessage>('Message', messageSchema);
 export default Message;

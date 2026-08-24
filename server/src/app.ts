@@ -26,6 +26,7 @@ import mongoose from 'mongoose';
 import http from 'http';
 import { initSocketServer } from './socket';
 import connectDB from './config/db';
+import { requestLogger, logger } from './utils/logger';
 
 // ─── Route imports ──────────────────────────────────────────────────────────
 import inventoryRoutes        from './routes/inventoryRoutes';
@@ -43,18 +44,46 @@ import { auditLogger }        from './middleware/auditLogger';
 
 const app = express();
 
-// ─── 0. Security Middleware (Helmet & Rate Limiting) ────────────────────────
-app.use(helmet()); // Sets various HTTP headers for security (CSP, HSTS, etc.)
+// ─── 0. Logging Middleware ───────────────────────────────────────────────────
+app.use(requestLogger);
 
-const apiLimiter = rateLimit({
+// ─── 1. Security Middleware (Helmet & Rate Limiting) ────────────────────────
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc:  ["'self'"],
+        styleSrc:   ["'self'", "'unsafe-inline'"],
+        imgSrc:     ["'self'", "data:", "https:"],
+        connectSrc: ["'self'", process.env.CLIENT_URL || 'http://localhost:5173'],
+      },
+    },
+    crossOriginEmbedderPolicy: false, // Allow cross-origin requests from SPA
+    hsts: { maxAge: 31_536_000, includeSubDomains: true, preload: true },
+  })
+);
+
+// Auth-specific rate limiter — stricter limit for login / registration
+const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes)
+  max: 10,                  // Max 10 auth attempts per window
   standardHeaders: true,
   legacyHeaders: false,
-  message: 'Too many requests from this IP, please try again after 15 minutes',
+  message: { success: false, message: 'Too many login attempts. Try again after 15 minutes.' },
 });
 
-// Apply the rate limiting middleware to API calls only
+// General API rate limiter
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 300,                 // Max 300 requests per window
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, message: 'Too many requests from this IP. Try again after 15 minutes.' },
+});
+
+// Auth limiter MUST precede the general API limiter so the stricter limit wins
+app.use('/api/auth', authLimiter);
 app.use('/api', apiLimiter);
 
 // ─── 1. CORS ─────────────────────────────────────────────────────────────────
@@ -109,6 +138,14 @@ app.get('/api/ready', (req: Request, res: Response) => {
   }
 });
 
+// ─── 3½. API Documentation (Swagger UI) ────────────────────────────────────
+import swaggerUi from 'swagger-ui-express';
+import { swaggerSpec } from './docs/swagger';
+
+app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+  customSiteTitle: 'Grace Pharmacy API Documentation',
+}));
+
 import { protect, authorizeRoles } from './middleware/authMiddleware';
 import { UserRole } from './types/enums';
 
@@ -138,7 +175,7 @@ const strictAdminGuard = [protect, authorizeRoles(UserRole.ADMIN)];
 app.use('/api/inventory', ...internalGuard, inventoryRoutes);
 app.use('/api/inventory', ...internalGuard, existingInventoryRoutes);
 app.use('/api/sales',     ...internalGuard, saleRouter);
-app.use('/api/suppliers', ...strictAdminGuard, supplierRouter);
+app.use('/api/suppliers', ...managerGuard, supplierRouter);
 app.use('/api/alerts',    ...strictAdminGuard, alertRoutes);
 app.use('/api/reports',   ...strictAdminGuard, reportRoutes);
 app.use('/api/analytics', ...strictAdminGuard, analyticsRoutes);
@@ -176,9 +213,11 @@ const bootstrap = async (): Promise<void> => {
   });
 };
 
-bootstrap().catch((err) => {
-  console.error('[FATAL] Failed to start server:', err);
-  process.exit(1);
-});
+if (process.env.NODE_ENV !== 'test') {
+  bootstrap().catch((err) => {
+    console.error('[FATAL] Failed to start server:', err);
+    process.exit(1);
+  });
+}
 
 export default app;

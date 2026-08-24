@@ -124,6 +124,9 @@ const inventoryBatchSchema = new Schema<IInventoryBatch>(
 // Compound index for FEFO (First Expired First Out) sorting: find active batches of a product sorted by nearest expiry
 inventoryBatchSchema.index({ product: 1, expiryDate: 1, status: 1 });
 
+// Alternate FEFO index — optimises queries that equality-match status before range-scanning expiryDate
+inventoryBatchSchema.index({ product: 1, status: 1, expiryDate: 1 });
+
 // Prevent duplicate batch entries per product
 inventoryBatchSchema.index({ product: 1, batchNumber: 1 }, { unique: true });
 

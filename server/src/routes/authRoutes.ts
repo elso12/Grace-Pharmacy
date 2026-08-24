@@ -7,30 +7,42 @@
  *
  * Route structure (all mounted under /api/auth in app.ts):
  *
- *   POST  /register  → Create a new user account
- *   POST  /login     → Authenticate and receive a JWT
- *   GET   /me        → Get current authenticated user profile
+ *   POST  /register        → Create a new user account
+ *   POST  /login           → Authenticate and receive a JWT
+ *   POST  /forgot-password → Request a password reset token
+ *   POST  /reset-password  → Reset password with a valid token
+ *   GET   /me              → Get current authenticated user profile
  */
 
 import { Router, type Request, type Response } from "express";
 import { registerUser, loginUser, forgotPassword, resetPassword } from "../controllers/authController";
 import { protect } from "../middleware/authMiddleware";
 import { asyncHandler } from "../utils/errors";
+import { validateRequest } from "../middleware/validate";
+import {
+  registerSchema,
+  loginSchema,
+  forgotPasswordSchema,
+  resetPasswordSchema,
+} from "../validations/auth.validation";
 
 const router: Router = Router();
 
 // ─── POST /api/auth/register ────────────────────────────────────────────────
 // Creates a new user with a hashed password and returns a JWT.
 // Body: { firstName, lastName, email, password, role?, phone?, licenseNumber? }
-router.post("/register", registerUser);
+router.post("/register", validateRequest(registerSchema), registerUser);
 
 // ─── POST /api/auth/login ───────────────────────────────────────────────────
 // Authenticates credentials and returns a JWT + user profile.
 // Body: { email, password }
-router.post("/login", loginUser);
+router.post("/login", validateRequest(loginSchema), loginUser);
 
-router.post("/forgot-password", forgotPassword);
-router.post("/reset-password", resetPassword);
+// ─── POST /api/auth/forgot-password ─────────────────────────────────────────
+router.post("/forgot-password", validateRequest(forgotPasswordSchema), forgotPassword);
+
+// ─── POST /api/auth/reset-password ──────────────────────────────────────────
+router.post("/reset-password", validateRequest(resetPasswordSchema), resetPassword);
 
 // ─── GET /api/auth/me ───────────────────────────────────────────────────────
 // Returns the currently authenticated user's profile.

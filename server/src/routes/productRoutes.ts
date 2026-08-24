@@ -9,12 +9,18 @@ import {
 } from '../controllers/productController';
 import { protect, authorizeRoles } from '../middleware/authMiddleware';
 import { UserRole } from '../types/enums';
+import { validateRequest } from '../middleware/validate';
+import {
+  createProductSchema,
+  updateProductSchema,
+  queryProductSchema,
+} from '../validations/product.validation';
 
 const router = Router();
 
 // ─── Public Storefront Routes ───────────────────────────────────────────────
 // GET endpoints are public so the B2C storefront can display the catalog
-router.get('/', getProducts);
+router.get('/', validateRequest(queryProductSchema), getProducts);
 router.get('/:id', getProductById);
 
 // ─── Admin Internal Routes ──────────────────────────────────────────────────
@@ -23,6 +29,7 @@ router.post(
   '/',
   protect,
   authorizeRoles(UserRole.ADMIN, UserRole.PHARMACIST),
+  validateRequest(createProductSchema),
   createProduct
 );
 
@@ -30,6 +37,7 @@ router.put(
   '/:id',
   protect,
   authorizeRoles(UserRole.ADMIN, UserRole.PHARMACIST),
+  validateRequest(updateProductSchema),
   updateProduct
 );
 

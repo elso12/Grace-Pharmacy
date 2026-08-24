@@ -21,6 +21,11 @@ import {
 } from "../controllers/inventoryController";
 import { protect, authorizeRoles } from "../middleware/authMiddleware";
 import { UserRole } from "../types/enums";
+import { validateRequest } from "../middleware/validate";
+import {
+  createBatchSchema,
+  dispenseSchema,
+} from "../validations/inventory.validation";
 
 const router: Router = Router();
 
@@ -28,12 +33,24 @@ const router: Router = Router();
 // Receives a new shipment of medication into inventory.
 // Body: { productId, batchNumber, quantity, expiryDate, purchasePrice,
 //         sellingPrice, manufacturingDate?, supplierId?, receivedDate?, notes? }
-router.post("/batch", protect, authorizeRoles(UserRole.ADMIN, UserRole.PHARMACIST), addBatch);
+router.post(
+  "/batch",
+  protect,
+  authorizeRoles(UserRole.ADMIN, UserRole.PHARMACIST),
+  validateRequest(createBatchSchema),
+  addBatch
+);
 
 // ─── POST /api/inventory/dispense ───────────────────────────────────────────
 // The FEFO engine: deducts stock from batches nearest to expiry first.
 // Body: { productId, quantityToDispense }
 // Returns a detailed breakdown of which batches were affected.
-router.post("/dispense", protect, authorizeRoles(UserRole.ADMIN, UserRole.PHARMACIST, UserRole.CASHIER), dispenseMedication);
+router.post(
+  "/dispense",
+  protect,
+  authorizeRoles(UserRole.ADMIN, UserRole.PHARMACIST, UserRole.CASHIER),
+  validateRequest(dispenseSchema),
+  dispenseMedication
+);
 
 export default router;

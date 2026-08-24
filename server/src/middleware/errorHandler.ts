@@ -21,7 +21,7 @@ export const errorHandler = (
   // ── Custom AppError ──────────────────────────────────────────────────
   if (err instanceof AppError) {
     res.status(err.statusCode).json({
-      status: "error",
+      success: false,
       message: err.message,
     });
     return;
@@ -33,7 +33,7 @@ export const errorHandler = (
       err.errors as unknown as Record<string, { message: string }>
     );
     res.status(422).json({
-      status: "error",
+      success: false,
       message: "Validation failed",
       errors,
     });
@@ -43,7 +43,7 @@ export const errorHandler = (
   // ── Mongoose CastError (e.g., invalid ObjectId) ──────────────────────
   if (err instanceof mongoose.Error.CastError) {
     res.status(400).json({
-      status: "error",
+      success: false,
       message: `Invalid ${err.path}: ${err.value}`,
     });
     return;
@@ -60,7 +60,7 @@ export const errorHandler = (
     >;
     const field = Object.keys(keyValue || {})[0] || "field";
     res.status(409).json({
-      status: "error",
+      success: false,
       message: `Duplicate value for '${field}'. This value already exists.`,
     });
     return;
@@ -69,7 +69,7 @@ export const errorHandler = (
   // ── Unexpected Error ─────────────────────────────────────────────────
   console.error("[UNHANDLED ERROR]", err);
   res.status(500).json({
-    status: "error",
+    success: false,
     message:
       process.env.NODE_ENV === "production"
         ? "Internal server error"

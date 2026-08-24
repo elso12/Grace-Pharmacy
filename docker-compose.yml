@@ -1,36 +1,46 @@
+version: '3.8'
+
 services:
-  # 1. MongoDB Database
-  mongo:
-    image: mongo:latest
-    container_name: grace-pharmacy-mongo
+  mongodb:
+    image: mongo:6.0
+    container_name: grace_pharmacy_db
+    restart: always
     ports:
       - "27017:27017"
     volumes:
-      - mongo-data:/data/db
+      - mongo_data:/data/db
+    environment:
+      MONGO_INITDB_DATABASE: pharmflow
 
-  # 2. Node.js Express Backend
   server:
-    build: ./server
-    container_name: grace-pharmacy-server
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: grace_pharmacy_api
+    restart: always
     ports:
       - "5000:5000"
     environment:
+      - NODE_ENV=development
       - PORT=5000
-      - MONGO_URI=mongodb://mongo:27017/grace-pharmacy
-      - JWT_SECRET=my_super_secret_key_123
+      - MONGO_URI=mongodb://mongodb:27017/pharmflow
+      - JWT_SECRET=pharmflow_jwt_secret_dev_2026!
+      - CLIENT_URL=http://localhost:5173
     depends_on:
-      - mongo
+      - mongodb
 
-  # 3. React Vite Frontend
   client:
-    build: ./client
-    container_name: grace-pharmacy-client
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: grace_pharmacy_client
+    restart: always
     ports:
       - "5173:5173"
     environment:
-      - VITE_API_BASE_URL=http://localhost:5000/api
+      - VITE_API_URL=http://localhost:5000/api
     depends_on:
       - server
 
 volumes:
-  mongo-data:
+  mongo_data:

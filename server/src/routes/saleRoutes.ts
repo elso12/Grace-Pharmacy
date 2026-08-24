@@ -2,6 +2,8 @@ import { Router } from 'express';
 import { posCheckout, refundSale } from '../controllers/saleController';
 import { protect, authorizeRoles } from '../middleware/authMiddleware';
 import { UserRole } from '../types/enums';
+import { validateRequest } from '../middleware/validate';
+import { posSaleSchema } from '../validations/order.validation';
 
 const router = Router();
 
@@ -10,6 +12,7 @@ router.post(
   '/pos',
   protect,
   authorizeRoles(UserRole.CASHIER, UserRole.PHARMACIST, UserRole.ADMIN),
+  validateRequest(posSaleSchema),
   posCheckout
 );
 
