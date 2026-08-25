@@ -45,7 +45,8 @@ import TimesheetsPage from './pages/Admin/TimesheetsPage';
 import PrescriptionQueuePage from './pages/Pharmacist/PrescriptionQueuePage';
 import BatchTrackerPage from './pages/Pharmacist/BatchTrackerPage';
 import PatientHistoryPage from './pages/Pharmacist/PatientHistoryPage';
-import PharmacistDashboard from './pages/Admin/PharmacistDashboard';
+import PharmacistDashboard from './pages/Pharmacist/PharmacistDashboard';
+import PharmacistLayout from './layouts/PharmacistLayout';
 import PharmacistQueue from './pages/Admin/PharmacistQueue';
 
 // Cashier Pages
@@ -87,7 +88,7 @@ const App: React.FC = () => (
           <Route path="/reset-password" element={<ResetPasswordPage />} />
 
           {/* Protected Admin Routes */}
-          <Route path="/admin" element={<ProtectedRoute allowedRoles={['ADMIN', 'PHARMACIST', 'TECHNICIAN', 'CASHIER']} />}>
+          <Route path="/admin" element={<ProtectedRoute allowedRoles={['ADMIN', 'TECHNICIAN', 'CASHIER']} />}>
             <Route element={<Layout />}>
               
               {/* ── Role-Specific Dashboards (index route) ──────────────── */}
@@ -95,12 +96,6 @@ const App: React.FC = () => (
               <Route element={<ProtectedRoute allowedRoles={['ADMIN']} />}>
                 <Route index                element={<AdminDashboard />} />
                 <Route path="dashboard"     element={<AdminDashboard />} />
-              </Route>
-
-              {/* Pharmacist dashboard */}
-              <Route element={<ProtectedRoute allowedRoles={['PHARMACIST']} />}>
-                <Route index                element={<PharmacistDashboard />} />
-                <Route path="dashboard"     element={<PharmacistDashboard />} />
               </Route>
 
               {/* Cashier dashboard */}
@@ -115,8 +110,8 @@ const App: React.FC = () => (
                 <Route path="dashboard"     element={<TechnicianDashboard />} />
               </Route>
 
-              {/* ── Common Manager/Staff Pages (Pharmacist + Admin) ────── */}
-              <Route element={<ProtectedRoute allowedRoles={['PHARMACIST', 'ADMIN']} />}>
+              {/* ── Common Manager/Staff Pages (Admin) ────── */}
+              <Route element={<ProtectedRoute allowedRoles={['ADMIN']} />}>
                 <Route path="prescriptions"   element={<PrescriptionQueuePage />} />
                 <Route path="batch-tracker"    element={<BatchTrackerPage />} />
                 <Route path="patient-history"  element={<PatientHistoryPage />} />
@@ -127,14 +122,14 @@ const App: React.FC = () => (
               <Route path="messages" element={<MessagesPage />} />
 
               {/* ── Technician / Staff Pages ────────────────────────────── */}
-              <Route element={<ProtectedRoute allowedRoles={['TECHNICIAN', 'PHARMACIST', 'ADMIN']} />}>
+              <Route element={<ProtectedRoute allowedRoles={['TECHNICIAN', 'ADMIN']} />}>
                 <Route path="pick-list" element={<PickListQueue />} />
                 <Route path="cycle-count" element={<CycleCountForm />} />
                 <Route path="shelf-directory" element={<ShelfDirectory />} />
               </Route>
               
-              {/* ── POS Page — restricted to cashiers, pharmacists, and admins ── */}
-              <Route element={<ProtectedRoute allowedRoles={['CASHIER', 'PHARMACIST', 'ADMIN']} />}>
+              {/* ── POS Page — restricted to cashiers and admins ── */}
+              <Route element={<ProtectedRoute allowedRoles={['CASHIER', 'ADMIN']} />}>
                 <Route path="pos" element={<POSPage />} />
                 <Route path="pos/shift-close" element={<ShiftClosePage />} />
               </Route>
@@ -158,6 +153,19 @@ const App: React.FC = () => (
                 <Route path="transfers"     element={<StockTransferPage />} />
                 <Route path="timesheets"    element={<TimesheetsPage />} />
               </Route>
+            </Route>
+          </Route>
+
+          {/* Protected Pharmacist Routes */}
+          <Route path="/pharmacist" element={<ProtectedRoute allowedRoles={['PHARMACIST']} />}>
+            <Route element={<PharmacistLayout />}>
+              <Route index element={<PharmacistDashboard />} />
+              <Route path="dashboard" element={<PharmacistDashboard />} />
+              <Route path="prescriptions" element={<PrescriptionQueuePage />} />
+              <Route path="batches" element={<BatchTrackerPage />} />
+              <Route path="patients" element={<PatientHistoryPage />} />
+              <Route path="messages" element={<MessagesPage />} />
+              <Route path="approval-queue" element={<PharmacistQueue />} />
             </Route>
           </Route>
         </Routes>

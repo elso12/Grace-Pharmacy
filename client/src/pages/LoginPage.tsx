@@ -17,8 +17,6 @@ import { useNavigate, Link } from 'react-router-dom';
 import { Mail, Lock, Pill, Loader2, AlertCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
-/** Roles that belong to pharmacy staff — redirected to the admin panel. */
-const STAFF_ROLES = new Set(['ADMIN', 'PHARMACIST', 'TECHNICIAN', 'CASHIER']);
 
 const LoginPage: React.FC = () => {
   const [email,    setEmail]    = useState('');
@@ -36,11 +34,23 @@ const LoginPage: React.FC = () => {
   //   populated in state, before evaluating role-based routing.
   useEffect(() => {
     if (!loading && isAuthenticated && user) {
-      const role = user.role;
-      if (STAFF_ROLES.has(role)) {
-        navigate('/admin/dashboard', { replace: true });
-      } else {
-        navigate('/', { replace: true });
+      switch (user.role) {
+        case 'ADMIN':
+          navigate('/admin', { replace: true });
+          break;
+        case 'PHARMACIST':
+          navigate('/pharmacist', { replace: true });
+          break;
+        case 'TECHNICIAN':
+          navigate('/technician', { replace: true });
+          break;
+        case 'CASHIER':
+          navigate('/pos', { replace: true });
+          break;
+        case 'CUSTOMER':
+        default:
+          navigate('/customer/orders', { replace: true });
+          break;
       }
     }
   }, [isAuthenticated, loading, user, navigate]);
@@ -71,10 +81,23 @@ const LoginPage: React.FC = () => {
     
     console.log("LOGIN SUCCESS, REDIRECTING...");
     setTimeout(() => {
-      if (STAFF_ROLES.has(role)) {
-        navigate('/admin/dashboard', { replace: true });
-      } else {
-        navigate('/', { replace: true });
+      switch (role) {
+        case 'ADMIN':
+          navigate('/admin', { replace: true });
+          break;
+        case 'PHARMACIST':
+          navigate('/pharmacist', { replace: true });
+          break;
+        case 'TECHNICIAN':
+          navigate('/technician', { replace: true });
+          break;
+        case 'CASHIER':
+          navigate('/pos', { replace: true });
+          break;
+        case 'CUSTOMER':
+        default:
+          navigate('/customer/orders', { replace: true });
+          break;
       }
     }, 100);
   };
