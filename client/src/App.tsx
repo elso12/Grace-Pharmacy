@@ -37,6 +37,9 @@ import CompliancePage from './pages/Admin/CompliancePage';
 import ProcurementPage from './pages/Admin/ProcurementPage';
 import PnLReportsPage from './pages/Admin/PnLReportsPage';
 import InsuranceClaimsPage from './pages/Admin/InsuranceClaimsPage';
+import BranchManagementPage from './pages/Admin/BranchManagementPage';
+import StockTransferPage from './pages/Admin/StockTransferPage';
+import TimesheetsPage from './pages/Admin/TimesheetsPage';
 
 // Pharmacist Pages
 import PrescriptionQueuePage from './pages/Pharmacist/PrescriptionQueuePage';
@@ -151,6 +154,9 @@ const App: React.FC = () => (
                 <Route path="procurement"   element={<ProcurementPage />} />
                 <Route path="pnl-reports"   element={<PnLReportsPage />} />
                 <Route path="insurance"     element={<InsuranceClaimsPage />} />
+                <Route path="branches"      element={<BranchManagementPage />} />
+                <Route path="transfers"     element={<StockTransferPage />} />
+                <Route path="timesheets"    element={<TimesheetsPage />} />
               </Route>
             </Route>
           </Route>

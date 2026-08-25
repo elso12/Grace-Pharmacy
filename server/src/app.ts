@@ -48,6 +48,9 @@ import financialRoutes        from './routes/financialRoutes';
 import insuranceRoutes        from './routes/insuranceRoutes';
 import loyaltyRoutes          from './routes/loyaltyRoutes';
 import refillRoutes           from './routes/refillRoutes';
+import branchRoutes           from './routes/branchRoutes';
+import transferRoutes         from './routes/transferRoutes';
+import timesheetRoutes        from './routes/timesheetRoutes';
 
 const app = express();
 
@@ -195,6 +198,9 @@ app.use('/api/financials', financialRoutes);
 app.use('/api/insurance', insuranceRoutes);
 app.use('/api/customer/loyalty', loyaltyRoutes);
 app.use('/api/customer/refill-alerts', refillRoutes);
+app.use('/api/branches', branchRoutes);
+app.use('/api/transfers', transferRoutes);
+app.use('/api/timesheets', timesheetRoutes);
 
 app.use('/api/messages', protect, messageRouter);
 

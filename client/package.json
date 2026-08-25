@@ -12,6 +12,7 @@
   "dependencies": {
     "@types/recharts": "^1.8.29",
     "axios": "^1.7.0",
+    "date-fns": "^4.4.0",
     "lucide-react": "^0.460.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

@@ -10,6 +10,7 @@ export enum BranchType {
 export interface IBranch extends Document {
   tenantId: mongoose.Types.ObjectId;
   name: string;
+  code: string;
   type: BranchType;
   address: string;
   phone: string;
@@ -21,6 +22,7 @@ const BranchSchema: Schema = new Schema(
   {
     tenantId: { type: mongoose.Schema.Types.ObjectId, ref: 'Tenant', required: true, index: true },
     name: { type: String, required: true },
+    code: { type: String, required: true, unique: true },
     type: {
       type: String,
       enum: Object.values(BranchType),

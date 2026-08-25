@@ -22,11 +22,15 @@ import {
   Database,
   ShieldAlert,
   Activity,
-  ShieldCheck
+  ShieldCheck,
+  MapPin,
+  ArrowRightLeft,
+  Clock
 } from 'lucide-react';
 import NotificationBell from './NotificationBell';
 import LiveChatWidget from './LiveChatWidget';
 import { UserProfileDropdown } from './layout/UserProfileDropdown';
+import ClockWidget from './layout/ClockWidget';
 
 import { useAuth } from '../context/AuthContext';
 
@@ -60,6 +64,9 @@ const navItems: NavItem[] = [
   { path: '/admin/compliance', label: 'Compliance', icon: <ShieldAlert size={20} />, roles: ['ADMIN'] },
   { path: '/admin/procurement', label: 'Procurement', icon: <Truck size={20} />, roles: ['ADMIN'] },
   { path: '/admin/insurance', label: 'Insurance Claims', icon: <ShieldCheck size={20} />, roles: ['ADMIN'] },
+  { path: '/admin/branches', label: 'Branches', icon: <MapPin size={20} />, roles: ['ADMIN'] },
+  { path: '/admin/transfers', label: 'Stock Transfers', icon: <ArrowRightLeft size={20} />, roles: ['ADMIN', 'PHARMACIST'] },
+  { path: '/admin/timesheets', label: 'Timesheets & Payroll', icon: <Clock size={20} />, roles: ['ADMIN'] },
   { path: '/admin/pnl-reports', label: 'P&L Statement', icon: <Activity size={20} />, roles: ['ADMIN'] },
   { path: '/admin/data-migration', label: 'Data Migration', icon: <Database size={20} />, roles: ['ADMIN'] },
   { path: '/admin/settings', label: 'Settings', icon: <Settings size={20} />, roles: ['ADMIN'] },
@@ -190,6 +197,7 @@ const Layout: React.FC = () => {
 
           {/* Right-side actions */}
           <div className="flex items-center gap-3">
+            <ClockWidget />
             {/* Notifications */}
             <NotificationBell />
 

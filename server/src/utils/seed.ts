@@ -36,7 +36,10 @@ async function seedMasterDatabase() {
       'auditlogs',
       'alerts',
       'customers',
-      'messages'
+      'messages',
+      'branches',
+      'stocktransfers',
+      'timesheets'
     ];
     for (const name of collections) {
       try {
@@ -946,6 +949,148 @@ async function seedMasterDatabase() {
     ];
     await db.collection('messages').insertMany(messages);
     console.log(' Created mock messages.');
+
+    // 9. Seed Phase 3: Branches, Transfers, and Timesheets
+    console.log('Seeding Phase 3: Branches, Transfers, and Timesheets...');
+    
+    const branches = [
+      {
+        tenantId: userIds[0],
+        name: 'Grace Pharmacy - Central Hospital',
+        code: 'BR-01',
+        type: 'HEADQUARTERS',
+        address: '100 Healthcare Blvd',
+        phone: '+1 (555) 100-0001',
+        isActive: true,
+        managerId: userIds[0],
+        createdAt: daysAgo(90),
+        updatedAt: now,
+      },
+      {
+        tenantId: userIds[0],
+        name: 'Grace Pharmacy - Westside Clinic',
+        code: 'BR-02',
+        type: 'SATELLITE_CLINIC',
+        address: '450 West Avenue',
+        phone: '+1 (555) 200-0002',
+        isActive: true,
+        managerId: userIds[1],
+        createdAt: daysAgo(60),
+        updatedAt: now,
+      }
+    ];
+    const branchResult = await db.collection('branches').insertMany(branches);
+    const branchIds = Object.values(branchResult.insertedIds);
+    console.log(` Created 2 Branches.`);
+
+    const transfers = [
+      {
+        transferNumber: 'TRF-2026-001',
+        fromBranchId: branchIds[0],
+        toBranchId: branchIds[1],
+        requestedBy: userIds[0],
+        approvedBy: userIds[0],
+        receivedBy: userIds[1],
+        status: 'RECEIVED',
+        items: [
+          { productId: productIds[4], productName: 'Panadol Extra 500mg', batchNumber: 'PAN-2026-005', quantity: 50 }
+        ],
+        dispatchedAt: daysAgo(5),
+        receivedAt: daysAgo(4),
+        createdAt: daysAgo(6),
+        updatedAt: daysAgo(4),
+      },
+      {
+        transferNumber: 'TRF-2026-002',
+        fromBranchId: branchIds[0],
+        toBranchId: branchIds[1],
+        requestedBy: userIds[1],
+        approvedBy: userIds[0],
+        status: 'IN_TRANSIT',
+        items: [
+          { productId: productIds[2], productName: 'Ventolin HFA Inhaler', batchNumber: 'VEN-2026-003', quantity: 20 }
+        ],
+        dispatchedAt: daysAgo(1),
+        createdAt: daysAgo(2),
+        updatedAt: daysAgo(1),
+      }
+    ];
+    await db.collection('stocktransfers').insertMany(transfers);
+    console.log(` Created 2 Stock Transfers.`);
+
+    const timesheets = [
+      {
+        staffId: userIds[1],
+        staffName: 'Marcus Vance, PharmD',
+        role: 'PHARMACIST',
+        branchId: branchIds[0],
+        clockIn: daysAgo(2),
+        clockOut: new Date(daysAgo(2).getTime() + 8.5 * 3600000), // 8.5 hours
+        totalHours: 8.5,
+        hourlyRate: 45.0,
+        overtimeHours: 0.5,
+        status: 'COMPLETED',
+        createdAt: daysAgo(2),
+        updatedAt: daysAgo(2),
+      },
+      {
+        staffId: userIds[2],
+        staffName: 'David Chen (Lead Tech)',
+        role: 'TECHNICIAN',
+        branchId: branchIds[0],
+        clockIn: daysAgo(2),
+        clockOut: new Date(daysAgo(2).getTime() + 8 * 3600000), // 8 hours
+        totalHours: 8.0,
+        hourlyRate: 25.0,
+        overtimeHours: 0,
+        status: 'PAID',
+        createdAt: daysAgo(2),
+        updatedAt: daysAgo(1),
+      },
+      {
+        staffId: userIds[3],
+        staffName: 'Elena Gomez (Senior Cashier)',
+        role: 'CASHIER',
+        branchId: branchIds[0],
+        clockIn: daysAgo(2),
+        clockOut: new Date(daysAgo(2).getTime() + 7 * 3600000), // 7 hours
+        totalHours: 7.0,
+        hourlyRate: 18.0,
+        overtimeHours: 0,
+        status: 'APPROVED',
+        createdAt: daysAgo(2),
+        updatedAt: daysAgo(2),
+      },
+      {
+        staffId: userIds[1],
+        staffName: 'Marcus Vance, PharmD',
+        role: 'PHARMACIST',
+        branchId: branchIds[0],
+        clockIn: daysAgo(1),
+        clockOut: new Date(daysAgo(1).getTime() + 8 * 3600000), // 8 hours
+        totalHours: 8.0,
+        hourlyRate: 45.0,
+        overtimeHours: 0,
+        status: 'COMPLETED',
+        createdAt: daysAgo(1),
+        updatedAt: daysAgo(1),
+      },
+      {
+        staffId: userIds[0],
+        staffName: 'Dr. Sarah Jenkins',
+        role: 'ADMIN',
+        branchId: branchIds[0],
+        clockIn: new Date(now.getTime() - 4.5 * 3600000), // Clocked in 4.5 hours ago
+        totalHours: 0,
+        hourlyRate: 50.0,
+        overtimeHours: 0,
+        status: 'ACTIVE',
+        createdAt: now,
+        updatedAt: now,
+      }
+    ];
+    await db.collection('timesheets').insertMany(timesheets);
+    console.log(` Created 5 Staff Timesheets.`);
 
     console.log('\n──────────────────────────────────────────────────────────');
     console.log('✅ Master Database Seeding Completed Successfully!');
