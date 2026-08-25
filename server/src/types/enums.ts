@@ -39,6 +39,14 @@ export enum ProductCategory {
   MEDICAL_DEVICE = "MEDICAL_DEVICE",
   COSMETIC = "COSMETIC",
   OTHER = "OTHER",
+  // Storefront Categories
+  VITAMINS = "Vitamins",
+  PAIN_RELIEF = "Pain Relief",
+  ALLERGY = "Allergy",
+  FIRST_AID = "First Aid",
+  COLD_FLU = "Cold & Flu",
+  DIGESTIVE_HEALTH = "Digestive Health",
+  MOTHER_BABY = "Mother & Baby",
 }
 
 // ─── Sale Status ────────────────────────────────────────────────────────────

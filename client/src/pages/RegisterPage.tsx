@@ -26,7 +26,6 @@ import {
   Loader2,
   AlertCircle,
   User,
-  Briefcase,
   CheckCircle2,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
@@ -102,6 +101,7 @@ const RegisterPage: React.FC = () => {
     // The backend controller splits it back into firstName / lastName.
     const fullName = `${formData.firstName.trim()} ${formData.lastName.trim()}`;
 
+    const result = await register(
       fullName,
       formData.email.trim(),
       formData.password,
