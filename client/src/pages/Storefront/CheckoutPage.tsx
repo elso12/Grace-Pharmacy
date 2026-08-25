@@ -25,6 +25,7 @@ interface ShippingForm {
   cardCvc?: string;
   walletPhone?: string;
   walletProvider?: string;
+  transactionReference?: string;
   insuranceProvider?: string;
   policyNumber?: string;
 }
@@ -45,7 +46,8 @@ const INITIAL_FORM: ShippingForm = {
   cardExpiry: '',
   cardCvc: '',
   walletPhone: '',
-  walletProvider: 'Telebirr',
+  walletProvider: 'TELEBIRR',
+  transactionReference: '',
   insuranceProvider: '',
   policyNumber: '',
 };
@@ -113,6 +115,7 @@ const CheckoutPage: React.FC = () => {
           cardExpiry: form.cardExpiry,
           walletPhone: form.walletPhone,
           walletProvider: form.walletProvider,
+          transactionReference: form.transactionReference,
           insuranceProvider: form.insuranceProvider,
           policyNumber: form.policyNumber,
         },
@@ -576,17 +579,47 @@ const CheckoutPage: React.FC = () => {
                 {form.paymentMethod === 'MOBILE_WALLET' && (
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-xs font-semibold text-slate-600 mb-1.5">Wallet Provider <span className="text-rose-500">*</span></label>
-                      <select name="walletProvider" value={form.walletProvider} onChange={handleField} className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
-                        <option value="Telebirr">Telebirr</option>
-                        <option value="CBE Birr">CBE Birr</option>
-                        <option value="Apple Pay">Apple Pay</option>
-                        <option value="Google Pay">Google Pay</option>
-                      </select>
+                      <label className="block text-xs font-semibold text-slate-600 mb-2">Wallet Provider <span className="text-rose-500">*</span></label>
+                      <div className="grid grid-cols-2 gap-3 mb-4">
+                        <label className={`flex items-center gap-2 p-3 rounded-xl border-2 cursor-pointer transition-all ${form.walletProvider === 'TELEBIRR' ? 'border-blue-500 bg-blue-50' : 'border-slate-200'}`}>
+                          <input type="radio" name="walletProvider" value="TELEBIRR" checked={form.walletProvider === 'TELEBIRR'} onChange={handleField} className="sr-only" />
+                          <div className="w-6 h-6 rounded bg-blue-600 flex items-center justify-center text-white text-xs font-bold">T</div>
+                          <div className="text-sm font-bold text-slate-700">Telebirr</div>
+                        </label>
+                        <label className={`flex items-center gap-2 p-3 rounded-xl border-2 cursor-pointer transition-all ${form.walletProvider === 'CBE_BIRR' ? 'border-purple-500 bg-purple-50' : 'border-slate-200'}`}>
+                          <input type="radio" name="walletProvider" value="CBE_BIRR" checked={form.walletProvider === 'CBE_BIRR'} onChange={handleField} className="sr-only" />
+                          <div className="w-6 h-6 rounded bg-purple-600 flex items-center justify-center text-white text-xs font-bold">C</div>
+                          <div className="text-sm font-bold text-slate-700">CBE Birr</div>
+                        </label>
+                        <label className={`flex items-center gap-2 p-3 rounded-xl border-2 cursor-pointer transition-all ${form.walletProvider === 'BOA' ? 'border-rose-500 bg-rose-50' : 'border-slate-200'}`}>
+                          <input type="radio" name="walletProvider" value="BOA" checked={form.walletProvider === 'BOA'} onChange={handleField} className="sr-only" />
+                          <div className="w-6 h-6 rounded bg-rose-600 flex items-center justify-center text-white text-xs font-bold">B</div>
+                          <div className="text-sm font-bold text-slate-700">BOA (Apollo)</div>
+                        </label>
+                        <label className={`flex items-center gap-2 p-3 rounded-xl border-2 cursor-pointer transition-all ${form.walletProvider === 'AWASH_BIRR' ? 'border-orange-500 bg-orange-50' : 'border-slate-200'}`}>
+                          <input type="radio" name="walletProvider" value="AWASH_BIRR" checked={form.walletProvider === 'AWASH_BIRR'} onChange={handleField} className="sr-only" />
+                          <div className="w-6 h-6 rounded bg-orange-500 flex items-center justify-center text-white text-xs font-bold">A</div>
+                          <div className="text-sm font-bold text-slate-700">Awash Birr</div>
+                        </label>
+                      </div>
+                      
+                      <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 text-sm text-slate-700 mb-4">
+                        {form.walletProvider === 'TELEBIRR' && "Pay to Grace Pharmacy Telebirr Merchant ID: 984210 or enter your phone number below to receive an USSD prompt."}
+                        {form.walletProvider === 'CBE_BIRR' && "Pay via CBE Birr to Account / Till: 883104 (Grace Pharmacy PLC)."}
+                        {form.walletProvider === 'BOA' && "Pay via Apollo / Bank of Abyssinia to Merchant ID: 554321."}
+                        {form.walletProvider === 'AWASH_BIRR' && "Pay via Awash Birr to Till: 112233."}
+                        {!form.walletProvider && "Select a provider above to see payment instructions."}
+                      </div>
                     </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-600 mb-1.5">Wallet Phone / Account <span className="text-rose-500">*</span></label>
-                      <input name="walletPhone" type="text" value={form.walletPhone} onChange={handleField} required placeholder="+1 (555) 000-0000" className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" />
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-600 mb-1.5">Customer Phone Number <span className="text-rose-500">*</span></label>
+                        <input name="walletPhone" type="text" value={form.walletPhone} onChange={handleField} required placeholder="0911234567" className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-600 mb-1.5">Transaction Reference <span className="text-rose-500">*</span></label>
+                        <input name="transactionReference" type="text" value={form.transactionReference} onChange={handleField} required placeholder="e.g. TLB-893140" className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" />
+                      </div>
                     </div>
                   </div>
                 )}

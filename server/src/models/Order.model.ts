@@ -25,6 +25,9 @@ export interface IOrder extends Document {
   shippingAddress?: IShippingAddress;
   paymentMethod: PaymentMethod;
   paymentStatus: OrderPaymentStatus;
+  walletProvider?: 'TELEBIRR' | 'CBE_BIRR' | 'BOA' | 'AWASH_BIRR' | 'OTHER' | null;
+  walletPhone?: string | null;
+  transactionReference?: string | null;
   prescriptionRequired: boolean;
   approvedByPharmacist: boolean;
   createdAt: Date;
@@ -115,6 +118,19 @@ const orderSchema = new Schema<IOrder>(
       type: String,
       enum: Object.values(OrderPaymentStatus),
       default: OrderPaymentStatus.UNPAID,
+    },
+    walletProvider: {
+      type: String,
+      enum: ['TELEBIRR', 'CBE_BIRR', 'BOA', 'AWASH_BIRR', 'OTHER', null],
+      default: null,
+    },
+    walletPhone: {
+      type: String,
+      default: null,
+    },
+    transactionReference: {
+      type: String,
+      default: null,
     },
     prescriptionRequired: {
       type: Boolean,

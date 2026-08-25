@@ -29,6 +29,9 @@ export interface ISale extends Document {
   discountTotal: number;
   totalAmount: number;
   paymentMethod: PaymentMethod;
+  walletProvider?: 'TELEBIRR' | 'CBE_BIRR' | 'BOA' | 'AWASH_BIRR' | 'OTHER' | null;
+  walletPhone?: string | null;
+  transactionReference?: string | null;
   amountPaid: number;
   changeGiven: number;
   status: SaleStatus;
@@ -139,6 +142,19 @@ const saleSchema = new Schema<ISale>(
       type: String,
       enum: Object.values(PaymentMethod),
       required: [true, 'Payment method is required'],
+    },
+    walletProvider: {
+      type: String,
+      enum: ['TELEBIRR', 'CBE_BIRR', 'BOA', 'AWASH_BIRR', 'OTHER', null],
+      default: null,
+    },
+    walletPhone: {
+      type: String,
+      default: null,
+    },
+    transactionReference: {
+      type: String,
+      default: null,
     },
     amountPaid: {
       type: Number,

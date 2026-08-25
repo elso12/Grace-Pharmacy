@@ -50,8 +50,8 @@ export const createOrder = async (
     }
 
     let mappedPaymentMethod = PaymentMethod.CASH;
-    if (paymentMethod === 'CARD') mappedPaymentMethod = PaymentMethod.CREDIT_CARD;
-    if (paymentMethod === 'MOBILE_WALLET') mappedPaymentMethod = PaymentMethod.MOBILE_PAYMENT;
+    if (paymentMethod === 'CARD') mappedPaymentMethod = PaymentMethod.CARD;
+    if (paymentMethod === 'MOBILE_WALLET') mappedPaymentMethod = PaymentMethod.MOBILE_WALLET;
     if (paymentMethod === 'INSURANCE') mappedPaymentMethod = PaymentMethod.INSURANCE;
 
     let mappedFulfillmentType = FulfillmentType.PICKUP;

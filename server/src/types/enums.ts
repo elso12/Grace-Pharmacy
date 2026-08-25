@@ -24,10 +24,9 @@ export enum PrescriptionStatus {
 // ─── Payment Method ────────────────────────────────────────────────────────
 export enum PaymentMethod {
   CASH = "CASH",
-  CREDIT_CARD = "CREDIT_CARD",
-  DEBIT_CARD = "DEBIT_CARD",
+  CARD = "CARD",
   INSURANCE = "INSURANCE",
-  MOBILE_PAYMENT = "MOBILE_PAYMENT",
+  MOBILE_WALLET = "MOBILE_WALLET",
 }
 
 // ─── Product Category ──────────────────────────────────────────────────────

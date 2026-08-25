@@ -85,6 +85,8 @@ const POSPage: React.FC = () => {
   const [lastReceipt, setLastReceipt] = useState<DispenseResult[] | null>(null);
   const [printReceiptData, setPrintReceiptData] = useState<any | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<string>('CASH');
+  const [walletProvider, setWalletProvider] = useState<string>('TELEBIRR');
+  const [transactionReference, setTransactionReference] = useState<string>('');
   const [prescriptionId, setPrescriptionId] = useState<string>('');
   
   // Modal state for price override pin
@@ -355,7 +357,9 @@ const POSPage: React.FC = () => {
       const { data } = await api.post('/sales/pos', {
         items,
         prescriptionId: prescriptionId || undefined,
-        paymentMethod
+        paymentMethod,
+        walletProvider: paymentMethod === 'MOBILE_WALLET' ? walletProvider : undefined,
+        transactionReference: paymentMethod === 'MOBILE_WALLET' ? transactionReference : undefined,
       });
       
       const orderResult = data.data;
@@ -737,22 +741,30 @@ const POSPage: React.FC = () => {
               </div>
 
               {/* Tender & Rx Linking */}
-              <div className="mb-4 grid grid-cols-2 gap-3">
-                <div>
-                  <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                    Payment Method
-                  </label>
-                  <select
-                    value={paymentMethod}
-                    onChange={(e) => setPaymentMethod(e.target.value)}
-                    className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-xs font-bold text-slate-300 outline-none transition focus:border-indigo-500"
-                  >
-                    <option value="CASH">Cash</option>
-                    <option value="CREDIT_CARD">Credit Card</option>
-                    <option value="MOBILE_PAYMENT">Mobile Wallet</option>
-                    <option value="INSURANCE">Insurance Co-Pay</option>
-                  </select>
+              <div className="mb-4">
+                <label className="mb-2 block text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                  Payment Method
+                </label>
+                <div className="grid grid-cols-4 gap-2 mb-3">
+                  <button onClick={() => setPaymentMethod('CASH')} className={`py-2 rounded-lg text-xs font-bold transition-all ${paymentMethod === 'CASH' ? 'bg-emerald-500 text-white shadow-lg' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'}`}>💵 Cash</button>
+                  <button onClick={() => { setPaymentMethod('MOBILE_WALLET'); setWalletProvider('TELEBIRR'); }} className={`py-2 rounded-lg text-xs font-bold transition-all ${paymentMethod === 'MOBILE_WALLET' && walletProvider === 'TELEBIRR' ? 'bg-blue-500 text-white shadow-lg' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'}`}>📱 Telebirr</button>
+                  <button onClick={() => { setPaymentMethod('MOBILE_WALLET'); setWalletProvider('CBE_BIRR'); }} className={`py-2 rounded-lg text-xs font-bold transition-all ${paymentMethod === 'MOBILE_WALLET' && walletProvider === 'CBE_BIRR' ? 'bg-purple-500 text-white shadow-lg' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'}`}>🏦 CBE Birr</button>
+                  <button onClick={() => setPaymentMethod('CARD')} className={`py-2 rounded-lg text-xs font-bold transition-all ${paymentMethod === 'CARD' ? 'bg-indigo-500 text-white shadow-lg' : 'bg-slate-800 text-slate-400 hover:bg-slate-700'}`}>💳 Card</button>
                 </div>
+
+                {paymentMethod === 'MOBILE_WALLET' && (
+                  <div className="p-3 mb-3 rounded-lg border border-slate-700 bg-slate-800/50">
+                    <div className="text-center mb-3 text-xs font-bold text-white bg-slate-900 py-2 rounded">
+                      {walletProvider === 'TELEBIRR' && "Ask Customer to Scan QR or Pay to Till: 984210"}
+                      {walletProvider === 'CBE_BIRR' && "Ask Customer to Scan QR or Pay to Till: 883104"}
+                    </div>
+                    <div>
+                      <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-400">Transaction Code (Last 6 Digits)</label>
+                      <input type="text" value={transactionReference} onChange={(e) => setTransactionReference(e.target.value)} placeholder="e.g. 893140" className="w-full rounded-lg border border-slate-600 bg-slate-900 px-3 py-2 text-xs font-bold text-slate-200 outline-none focus:border-blue-500" />
+                    </div>
+                  </div>
+                )}
+                
                 <div>
                   <label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-slate-500">
                     Link Prescription
@@ -914,14 +926,35 @@ const POSPage: React.FC = () => {
                 ))}
               </div>
               
-              <div className="border-t border-dashed border-slate-300 pt-4 mb-8">
+              <div className="border-t border-dashed border-slate-300 pt-4 mb-4">
                 <div className="flex justify-between font-bold text-lg text-slate-900">
                   <span>TOTAL</span>
                   <span>${printReceiptData.totalAmount?.toFixed(2) || '0.00'}</span>
                 </div>
               </div>
+
+              {printReceiptData.paymentMethod === 'MOBILE_WALLET' && (
+                <div className="border-t border-dashed border-slate-300 pt-4 mb-8 text-xs font-mono">
+                  <div className="flex justify-between">
+                    <span>Payment Method:</span>
+                    <span>{printReceiptData.walletProvider} (Mobile Pay)</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Provider:</span>
+                    <span>{printReceiptData.walletProvider} Merchant</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Txn Ref:</span>
+                    <span>{printReceiptData.transactionReference}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Status:</span>
+                    <span>PAID</span>
+                  </div>
+                </div>
+              )}
               
-              <div className="text-center text-sm font-bold text-slate-500">
+              <div className="text-center text-sm font-bold text-slate-500 mt-8">
                 <p>Thank you for your business!</p>
                 <p className="font-normal mt-1">Please retain this receipt for your records.</p>
               </div>

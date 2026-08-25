@@ -62,8 +62,9 @@ export const checkoutSchema = z.object({
       .object({
         cardNumber: z.string().optional(),
         cardExpiry: z.string().optional(),
-        walletPhone: z.string().optional(),
-        walletProvider: z.string().optional(), // e.g. 'Telebirr', 'CBE Birr', 'Apple Pay', 'Google Pay'
+        walletPhone: z.string().optional().nullable(),
+        walletProvider: z.enum(['TELEBIRR', 'CBE_BIRR', 'BOA', 'AWASH_BIRR', 'OTHER']).optional().nullable(),
+        transactionReference: z.string().optional().nullable(),
         insuranceProvider: z.string().optional(),
         policyNumber: z.string().optional(),
       })
@@ -100,6 +101,10 @@ export const posSaleSchema = z.object({
     paymentMethod: z.nativeEnum(PaymentMethod, {
       error: 'Invalid payment method',
     }).default(PaymentMethod.CASH),
+
+    walletProvider: z.enum(['TELEBIRR', 'CBE_BIRR', 'BOA', 'AWASH_BIRR', 'OTHER']).optional().nullable(),
+    walletPhone: z.string().optional().nullable(),
+    transactionReference: z.string().optional().nullable(),
 
     prescriptionId: z
       .string()
