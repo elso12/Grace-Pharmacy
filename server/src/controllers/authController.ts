@@ -98,7 +98,6 @@ export const registerUser = async (req: Request, res: Response): Promise<void> =
       lastName,
       email,
       password,
-      role,
       phone,
       licenseNumber,
     } = req.body;
@@ -143,14 +142,8 @@ export const registerUser = async (req: Request, res: Response): Promise<void> =
       return;
     }
 
-    // ── Step 4: Validate role if provided ───────────────────────────────
-    if (role && !Object.values(UserRole).includes(role as UserRole)) {
-      res.status(400).json({
-        status:  "error",
-        message: `Invalid role "${role}". Accepted values: ${Object.values(UserRole).join(", ")}.`,
-      });
-      return;
-    }
+    // ── Step 4: Strict Security Guard - Enforce CUSTOMER role ───────────
+    // We intentionally ignore any role passed in the request body to prevent privilege escalation.
 
     // ── Step 5: Check for duplicate email ───────────────────────────────
     const normalizedEmail = String(email).toLowerCase().trim();
@@ -172,7 +165,7 @@ export const registerUser = async (req: Request, res: Response): Promise<void> =
       lastName:      resolvedLastName || resolvedFirstName,
       email:         normalizedEmail,
       password,                           // ← hashed by pre-save bcrypt hook
-      role:          role || UserRole.CUSTOMER,
+      role:          UserRole.CUSTOMER,   // Strict Security Guard: Enforce CUSTOMER role on public registration
       phone,
       licenseNumber,
     });

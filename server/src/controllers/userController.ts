@@ -127,6 +127,14 @@ export const toggleUserStatus = asyncHandler(async (req: Request, res: Response)
     throw new AppError('You cannot disable your own account', 400);
   }
 
+  // ── Strict Security Guard: Prevent locking out the last ADMIN ─────────
+  if (user.role === 'ADMIN' && user.isActive === true) {
+    const activeAdminsCount = await User.countDocuments({ role: 'ADMIN', isActive: true });
+    if (activeAdminsCount <= 1) {
+      throw new AppError('Security Violation: Cannot deactivate the last remaining Administrator.', 400);
+    }
+  }
+
   user.isActive = !user.isActive;
   await user.save();
 
@@ -161,5 +169,32 @@ export const resetPassword = asyncHandler(async (req: Request, res: Response) =>
   res.status(200).json({
     status: 'success',
     message: 'Password reset successfully'
+  });
+});
+
+/**
+ * @desc    Delete a user
+ * @route   DELETE /api/users/:id
+ * @access  Private (ADMIN)
+ */
+export const deleteUser = asyncHandler(async (req: Request, res: Response) => {
+  const user = await User.findById(req.params.id);
+  if (!user) {
+    throw new AppError('User not found', 404);
+  }
+
+  // ── Strict Security Guard: Prevent deleting the last ADMIN ───────────
+  if (user.role === 'ADMIN') {
+    const totalAdminsCount = await User.countDocuments({ role: 'ADMIN' });
+    if (totalAdminsCount <= 1) {
+      throw new AppError('Security Violation: Cannot delete the primary system Administrator.', 400);
+    }
+  }
+
+  await User.findByIdAndDelete(req.params.id);
+
+  res.status(200).json({
+    status: 'success',
+    message: 'User deleted successfully'
   });
 });

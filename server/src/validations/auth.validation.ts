@@ -40,8 +40,7 @@ export const registerSchema = z.object({
     email: emailField,
     password: passwordField,
 
-    /** Role — defaults to CUSTOMER in the controller */
-    role: z.nativeEnum(UserRole).optional(),
+    /** Role is stripped from public registration schema to prevent privilege escalation */
 
     phone: z.string().trim().optional(),
     licenseNumber: z.string().trim().optional(),

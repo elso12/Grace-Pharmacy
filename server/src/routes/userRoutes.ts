@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getUsers, getUserById, updateUser, toggleUserStatus, createUser, resetPassword } from '../controllers/userController';
+import { getUsers, getUserById, updateUser, toggleUserStatus, createUser, resetPassword, deleteUser } from '../controllers/userController';
 
 const router = Router();
 
@@ -10,5 +10,6 @@ router.get('/:id', getUserById);
 router.put('/:id', updateUser);
 router.patch('/:id/status', toggleUserStatus);
 router.post('/:id/reset-password', resetPassword);
+router.delete('/:id', deleteUser);
 
 export default router;

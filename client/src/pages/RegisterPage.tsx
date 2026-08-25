@@ -40,7 +40,8 @@ const RegisterPage: React.FC = () => {
     lastName:  '',
     email:     '',
     password:  '',
-    role:      'CASHIER',
+    phone:     '',
+    address:   '',
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error,     setError]     = useState('');
@@ -101,11 +102,10 @@ const RegisterPage: React.FC = () => {
     // The backend controller splits it back into firstName / lastName.
     const fullName = `${formData.firstName.trim()} ${formData.lastName.trim()}`;
 
-    const result = await register(
       fullName,
       formData.email.trim(),
       formData.password,
-      formData.role,
+      'CUSTOMER'
     );
 
     setIsLoading(false);
@@ -115,14 +115,8 @@ const RegisterPage: React.FC = () => {
       return;
     }
 
-    // Role comes from the form selection — no need to read from context or
-    // localStorage since we know exactly what role was submitted.
-    // The useEffect guard above also fires on next render as a safety net.
-    if (STAFF_ROLES.has(formData.role)) {
-      navigate('/admin/dashboard', { replace: true });
-    } else {
-      navigate('/', { replace: true });
-    }
+    // Registration is strictly for CUSTOMER accounts now.
+    navigate('/', { replace: true });
   };
 
   // Whether the form can be submitted (all required fields filled).
@@ -152,6 +146,10 @@ const RegisterPage: React.FC = () => {
           <p className="mt-2 text-sm text-slate-400">
             Create an account to access the system
           </p>
+          <div className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-blue-500/10 px-3 py-1 border border-blue-500/20 text-xs font-medium text-blue-300">
+            <User size={14} />
+            Creating a Patient / Customer Account
+          </div>
         </div>
 
         {/* ── Register card ──────────────────────────────────────────────── */}
@@ -289,37 +287,41 @@ const RegisterPage: React.FC = () => {
               )}
             </div>
 
-            {/* Role select */}
+            {/* Phone */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-slate-300" htmlFor="reg-role">
-                System Role
+              <label className="text-sm font-medium text-slate-300" htmlFor="reg-phone">
+                Phone Number
               </label>
               <div className="relative">
-                <Briefcase
-                  size={18}
-                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500"
-                  aria-hidden="true"
-                />
-                <select
-                  id="reg-role"
-                  name="role"
-                  value={formData.role}
+                <input
+                  id="reg-phone"
+                  name="phone"
+                  type="tel"
+                  value={formData.phone}
                   onChange={handleChange}
+                  placeholder="+1 (555) 000-0000"
                   disabled={isLoading}
-                  className="w-full appearance-none rounded-xl border border-slate-700 bg-slate-950/50 py-2.5 pl-10 pr-10 text-sm text-white transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 [&>option]:bg-slate-900 disabled:opacity-50"
-                >
-                  <option value="CUSTOMER">Customer</option>
-                  <option value="CASHIER">Cashier</option>
-                  <option value="TECHNICIAN">Pharmacy Technician</option>
-                  <option value="PHARMACIST">Pharmacist</option>
-                  <option value="ADMIN">Administrator</option>
-                </select>
-                {/* Custom dropdown chevron */}
-                <div className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-500">
-                  <svg className="h-4 w-4 fill-current" viewBox="0 0 20 20" aria-hidden="true">
-                    <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
-                  </svg>
-                </div>
+                  className="w-full rounded-xl border border-slate-700 bg-slate-950/50 py-2.5 px-4 text-sm text-white placeholder-slate-500 transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 disabled:opacity-50"
+                />
+              </div>
+            </div>
+
+            {/* Address */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-slate-300" htmlFor="reg-address">
+                Delivery Address
+              </label>
+              <div className="relative">
+                <input
+                  id="reg-address"
+                  name="address"
+                  type="text"
+                  value={formData.address}
+                  onChange={handleChange}
+                  placeholder="123 Main St, City"
+                  disabled={isLoading}
+                  className="w-full rounded-xl border border-slate-700 bg-slate-950/50 py-2.5 px-4 text-sm text-white placeholder-slate-500 transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 disabled:opacity-50"
+                />
               </div>
             </div>
 
