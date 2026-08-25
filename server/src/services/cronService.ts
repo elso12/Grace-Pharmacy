@@ -3,6 +3,7 @@ import Product from '../models/Product.model';
 import InventoryBatch from '../models/InventoryBatch.model';
 import Alert, { AlertType, AlertPriority, AlertStatus } from '../models/Alert.model';
 import { BatchStatus } from '../types/enums';
+import { checkRefillsAndGenerateAlerts } from './refillReminderService';
 
 /**
  * Scans InventoryBatches for items expiring in less than 30 days.
@@ -93,5 +94,11 @@ export const startCronJobs = () => {
     await scanExpiringBatches();
     await scanLowStock();
     console.log('[Cron] Inventory scan completed.');
+  });
+
+  // Run daily at 9:00 AM
+  cron.schedule('0 9 * * *', async () => {
+    console.log('[Cron] Starting daily refill reminders check...');
+    await checkRefillsAndGenerateAlerts();
   });
 };

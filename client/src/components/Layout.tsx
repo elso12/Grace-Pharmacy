@@ -21,7 +21,8 @@ import {
   ClipboardCheck,
   Database,
   ShieldAlert,
-  Activity
+  Activity,
+  ShieldCheck
 } from 'lucide-react';
 import NotificationBell from './NotificationBell';
 import LiveChatWidget from './LiveChatWidget';
@@ -58,6 +59,7 @@ const navItems: NavItem[] = [
   { path: '/admin/audit', label: 'Audit Logs', icon: <Settings size={20} />, roles: ['ADMIN'] },
   { path: '/admin/compliance', label: 'Compliance', icon: <ShieldAlert size={20} />, roles: ['ADMIN'] },
   { path: '/admin/procurement', label: 'Procurement', icon: <Truck size={20} />, roles: ['ADMIN'] },
+  { path: '/admin/insurance', label: 'Insurance Claims', icon: <ShieldCheck size={20} />, roles: ['ADMIN'] },
   { path: '/admin/pnl-reports', label: 'P&L Statement', icon: <Activity size={20} />, roles: ['ADMIN'] },
   { path: '/admin/data-migration', label: 'Data Migration', icon: <Database size={20} />, roles: ['ADMIN'] },
   { path: '/admin/settings', label: 'Settings', icon: <Settings size={20} />, roles: ['ADMIN'] },

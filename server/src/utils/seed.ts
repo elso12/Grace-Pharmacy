@@ -99,6 +99,7 @@ async function seedMasterDatabase() {
         isActive: true,
         phone: '+1 (555) 234-5678',
         address: '742 Evergreen Terrace, Springfield',
+        loyaltyPoints: 180,
         createdAt: daysAgo(90),
         updatedAt: now,
       },
@@ -743,7 +744,64 @@ async function seedMasterDatabase() {
       }
     ];
     await db.collection('orders').insertMany(orders);
+    const orderIds = Object.values((await db.collection('orders').find().toArray()).map(o => o._id));
     console.log(' Created historical POS transactions and order records.');
+
+    // 6.5 Seed Insurance Claims
+    console.log('Seeding Insurance Claims...');
+    const insuranceClaims = [
+      {
+        claimNumber: 'CLM-2026-1001',
+        orderId: orderIds[0],
+        prescriptionId: null, // or valid id if needed
+        patientId: userIds[5], // Jane Smith
+        patientName: 'Jane Smith',
+        insuranceProvider: 'BlueCross BlueShield',
+        policyNumber: 'BCBS-991823',
+        totalBilledAmount: 120.00,
+        patientCopayAmount: 20.00,
+        insuranceCoveredAmount: 100.00,
+        status: 'PENDING_ADJUDICATION',
+        createdAt: daysAgo(2),
+        updatedAt: daysAgo(2),
+      },
+      {
+        claimNumber: 'CLM-2026-1002',
+        orderId: orderIds[1],
+        prescriptionId: null,
+        patientId: userIds[4], // John Doe
+        patientName: 'John Doe',
+        insuranceProvider: 'UnitedHealthcare',
+        policyNumber: 'UHC-44519',
+        totalBilledAmount: 85.00,
+        patientCopayAmount: 15.00,
+        insuranceCoveredAmount: 70.00,
+        status: 'APPROVED_PAID',
+        remittanceCode: 'ERA-835-88412',
+        adjudicatedAt: daysAgo(1),
+        createdAt: daysAgo(3),
+        updatedAt: daysAgo(1),
+      },
+      {
+        claimNumber: 'CLM-2026-1003',
+        orderId: null,
+        prescriptionId: null,
+        patientId: userIds[4], // Michael Brown (using John Doe for demo)
+        patientName: 'Michael Brown',
+        insuranceProvider: 'Aetna',
+        policyNumber: 'AET-99211',
+        totalBilledAmount: 450.00,
+        patientCopayAmount: 50.00,
+        insuranceCoveredAmount: 400.00,
+        status: 'REJECTED',
+        rejectionReason: 'Prior authorization required',
+        adjudicatedAt: daysAgo(1),
+        createdAt: daysAgo(2),
+        updatedAt: daysAgo(1),
+      }
+    ];
+    await db.collection('insuranceclaims').insertMany(insuranceClaims);
+    console.log(' Created 3 insurance claims.');
 
     // 7. Seed System Audit Logs (For Admin Security View)
     console.log('Seeding Audit Trail Logs...');

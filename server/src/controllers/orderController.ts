@@ -280,6 +280,18 @@ export const updateOrderStatus = async (
     order.status = status;
     await order.save();
 
+    // CRM: Award Loyalty Points if order is completed
+    if (status === OrderStatus.COMPLETED) {
+      const User = require('../models/User.model').default;
+      const customer = await User.findById(order.customerId);
+      if (customer) {
+        // 1 point per $1 spent
+        const pointsToAward = Math.floor(order.totalAmount);
+        customer.loyaltyPoints = (customer.loyaltyPoints || 0) + pointsToAward;
+        await customer.save();
+      }
+    }
+
     res.status(200).json({
       status: 'success',
       data: order,

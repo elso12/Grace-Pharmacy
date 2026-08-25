@@ -45,6 +45,9 @@ import importRoutes           from './routes/importRoutes';
 import complianceRoutes       from './routes/complianceRoutes';
 import procurementRoutes      from './routes/procurementRoutes';
 import financialRoutes        from './routes/financialRoutes';
+import insuranceRoutes        from './routes/insuranceRoutes';
+import loyaltyRoutes          from './routes/loyaltyRoutes';
+import refillRoutes           from './routes/refillRoutes';
 
 const app = express();
 
@@ -189,6 +192,9 @@ app.use('/api/admin/import', ...strictAdminGuard, importRoutes);
 app.use('/api/admin/compliance', ...strictAdminGuard, complianceRoutes);
 app.use('/api/procurement', procurementRoutes);
 app.use('/api/financials', financialRoutes);
+app.use('/api/insurance', insuranceRoutes);
+app.use('/api/customer/loyalty', loyaltyRoutes);
+app.use('/api/customer/refill-alerts', refillRoutes);
 
 app.use('/api/messages', protect, messageRouter);
 

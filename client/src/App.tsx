@@ -36,6 +36,7 @@ import DataMigrationPage from './pages/Admin/DataMigrationPage';
 import CompliancePage from './pages/Admin/CompliancePage';
 import ProcurementPage from './pages/Admin/ProcurementPage';
 import PnLReportsPage from './pages/Admin/PnLReportsPage';
+import InsuranceClaimsPage from './pages/Admin/InsuranceClaimsPage';
 
 // Pharmacist Pages
 import PrescriptionQueuePage from './pages/Pharmacist/PrescriptionQueuePage';
@@ -149,6 +150,7 @@ const App: React.FC = () => (
                 <Route path="compliance"    element={<CompliancePage />} />
                 <Route path="procurement"   element={<ProcurementPage />} />
                 <Route path="pnl-reports"   element={<PnLReportsPage />} />
+                <Route path="insurance"     element={<InsuranceClaimsPage />} />
               </Route>
             </Route>
           </Route>
