@@ -109,13 +109,12 @@ vi.mock('../../models/index', () => ({
     findOne: vi.fn(),
   },
   Product: {
-    findById: vi.fn().mockReturnValue({
-      lean: vi.fn().mockResolvedValue({
-        _id: 'prod1',
-        name: 'Paracetamol',
-        isActive: true,
-        requiresPrescription: false,
-      }),
+    findById: vi.fn().mockResolvedValue({
+      _id: 'prod1',
+      name: 'Paracetamol',
+      unitPrice: 5.00,
+      isActive: true,
+      requiresPrescription: false,
     }),
     find: vi.fn().mockReturnValue({
       select: vi.fn().mockReturnValue({
@@ -123,6 +122,18 @@ vi.mock('../../models/index', () => ({
       }),
     }),
   },
+  User: {
+    findById: vi.fn().mockResolvedValue({
+      _id: '507f1f77bcf86cd799439022',
+      id: '507f1f77bcf86cd799439022',
+      firstName: 'Jane',
+      lastName: 'Cashier',
+      email: 'cashier@gracepharmacy.com',
+      role: 'CASHIER',
+      isActive: true,
+    }),
+    findByIdAndUpdate: vi.fn().mockResolvedValue(null),
+  }
 }));
 
 // ── Import after mocks ──────────────────────────────────────────────────

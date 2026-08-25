@@ -36,13 +36,17 @@ export const createOrder = async (
     let rxRequired = false;
 
     for (const item of items) {
-      const product = await Product.findById(item.productId);
+      const pId = item.productId || item.medicationId;
+      const product = await Product.findById(pId);
       if (!product) {
-        res.status(400).json({ success: false, message: `Product not found: ${item.name || item.productId}` });
+        res.status(400).json({ success: false, message: `Product not found: ${item.name || pId}` });
         return;
       }
       if (product.requiresPrescription) rxRequired = true;
-      subtotal += product.unitPrice * item.quantity;
+      
+      item.productId = pId;
+      item.unitPrice = item.unitPrice || product.unitPrice;
+      subtotal += item.unitPrice * item.quantity;
     }
 
     let mappedPaymentMethod = PaymentMethod.CASH;
