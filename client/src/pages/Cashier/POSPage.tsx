@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import api from '../../services/api';
 import BarcodeScanner from '../../components/pos/BarcodeScanner';
+import { printMedicationLabel } from '../../services/printService';
 
 // ═════════════════════════════════════════════════════════════════════════════
 // ─── TYPES ──────────────────────────────────────────────────────────────────
@@ -286,6 +287,22 @@ const POSPage: React.FC = () => {
       if (matchedProduct) {
         addToCart(matchedProduct);
         showToast('success', 'Product Added', `Added ${matchedProduct.name} to cart.`);
+        // Play audio confirmation beep
+        try {
+          // If not present, we can use a synthesized beep
+          const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+          const osc = ctx.createOscillator();
+          const gainNode = ctx.createGain();
+          osc.connect(gainNode);
+          gainNode.connect(ctx.destination);
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(800, ctx.currentTime);
+          gainNode.gain.setValueAtTime(0.1, ctx.currentTime);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.1);
+        } catch (e) {
+          console.error("Audio playback failed", e);
+        }
       } else {
         showToast('error', 'Not Found', `No product found for barcode ${barcode}.`);
       }
@@ -924,6 +941,26 @@ const POSPage: React.FC = () => {
               >
                 <ReceiptText size={16} />
                 Print Receipt
+              </button>
+              <button
+                onClick={() => {
+                  if (printReceiptData && printReceiptData.items) {
+                    printReceiptData.items.forEach((item: any) => {
+                      printMedicationLabel({
+                        patientName: 'Customer', // Would come from selected customer in full implementation
+                        medicationName: item.product?.name || 'Medication',
+                        strength: item.product?.strength,
+                        batchNumber: 'Auto-FEFO',
+                        expiryDate: new Date(Date.now() + 31536000000).toISOString(), // Mock expiry for 1 year
+                        dispenseDate: new Date().toISOString(),
+                      });
+                    });
+                  }
+                }}
+                className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold rounded-xl shadow-lg shadow-indigo-500/20"
+              >
+                <Pill size={16} />
+                Print Labels
               </button>
             </div>
             

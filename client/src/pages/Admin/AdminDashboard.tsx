@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { Package, ShoppingBag, TrendingUp, AlertTriangle, Loader2, Plus, ArrowRight } from 'lucide-react';
+import { Package, ShoppingBag, TrendingUp, AlertTriangle, Loader2, Plus, ArrowRight, Percent, DollarSign, Clock, CreditCard } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AreaChart, Area, XAxis, YAxis, Tooltip as RechartsTooltip, ResponsiveContainer } from 'recharts';
 import api from '../../services/api';
@@ -15,7 +15,11 @@ const AdminDashboard: React.FC = () => {
     lowStockCount: 0,
     expiringBatchesCount: 0,
     recentTransactions: [],
-    salesTrend: []
+    salesTrend: [],
+    stockoutRate: 0,
+    nearExpiryLossRisk: 0,
+    avgPrescriptionTurnaround: '0 mins',
+    paymentChannelSplit: []
   });
   const [loading, setLoading] = useState(true);
 
@@ -95,6 +99,59 @@ const AdminDashboard: React.FC = () => {
             </div>
           ))}
         </div>
+      )}
+
+      {/* ── Executive KPIs Row ───────────────────────────────────────────── */}
+      {!loading && (
+        <>
+          <h2 className="text-lg font-bold text-white mt-8 mb-4">Executive KPIs</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            <div className="flex flex-col gap-2 rounded-2xl border border-white/[0.08] bg-slate-900/60 p-5 backdrop-blur shadow-xl">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-medium text-slate-400">Stockout Rate</p>
+                <Percent size={16} className="text-rose-400" />
+              </div>
+              <p className="text-2xl font-bold text-white">{(analytics.stockoutRate || 0).toFixed(1)}%</p>
+              <p className="text-xs text-slate-500">Inventory items at 0 qty</p>
+            </div>
+            
+            <div className="flex flex-col gap-2 rounded-2xl border border-white/[0.08] bg-slate-900/60 p-5 backdrop-blur shadow-xl">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-medium text-slate-400">Loss Risk (30d)</p>
+                <DollarSign size={16} className="text-amber-400" />
+              </div>
+              <p className="text-2xl font-bold text-white">${(analytics.nearExpiryLossRisk || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+              <p className="text-xs text-slate-500">Value of near-expiry batches</p>
+            </div>
+
+            <div className="flex flex-col gap-2 rounded-2xl border border-white/[0.08] bg-slate-900/60 p-5 backdrop-blur shadow-xl">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-medium text-slate-400">Rx Turnaround</p>
+                <Clock size={16} className="text-indigo-400" />
+              </div>
+              <p className="text-2xl font-bold text-white">{analytics.avgPrescriptionTurnaround}</p>
+              <p className="text-xs text-slate-500">Avg time from Queue to Dispense</p>
+            </div>
+
+            <div className="flex flex-col gap-2 rounded-2xl border border-white/[0.08] bg-slate-900/60 p-5 backdrop-blur shadow-xl">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-medium text-slate-400">Payment Channels</p>
+                <CreditCard size={16} className="text-emerald-400" />
+              </div>
+              <div className="space-y-1 mt-1">
+                {(analytics.paymentChannelSplit || []).slice(0, 3).map((split: any) => (
+                  <div key={split.method} className="flex justify-between items-center text-xs">
+                    <span className="text-slate-300">{split.method}</span>
+                    <span className="font-bold text-emerald-400">{split.percentage.toFixed(0)}%</span>
+                  </div>
+                ))}
+                {(!analytics.paymentChannelSplit || analytics.paymentChannelSplit.length === 0) && (
+                  <p className="text-xs text-slate-500">No payment data</p>
+                )}
+              </div>
+            </div>
+          </div>
+        </>
       )}
 
       {/* ── Charts & Tables ──────────────────────────────────────────────── */}

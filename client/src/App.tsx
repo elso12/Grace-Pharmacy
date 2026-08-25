@@ -32,6 +32,10 @@ import ReportsPage from './pages/Admin/ReportsPage';
 import OrdersPage from './pages/Admin/OrdersPage';
 import SuppliersPage from './pages/Admin/SuppliersPage';
 import SettingsPage from './pages/Admin/SettingsPage';
+import DataMigrationPage from './pages/Admin/DataMigrationPage';
+import CompliancePage from './pages/Admin/CompliancePage';
+import ProcurementPage from './pages/Admin/ProcurementPage';
+import PnLReportsPage from './pages/Admin/PnLReportsPage';
 
 // Pharmacist Pages
 import PrescriptionQueuePage from './pages/Pharmacist/PrescriptionQueuePage';
@@ -141,6 +145,10 @@ const App: React.FC = () => (
                 <Route path="reports"       element={<ReportsPage />} />
                 <Route path="suppliers"     element={<SuppliersPage />} />
                 <Route path="settings"      element={<SettingsPage />} />
+                <Route path="data-migration" element={<DataMigrationPage />} />
+                <Route path="compliance"    element={<CompliancePage />} />
+                <Route path="procurement"   element={<ProcurementPage />} />
+                <Route path="pnl-reports"   element={<PnLReportsPage />} />
               </Route>
             </Route>
           </Route>

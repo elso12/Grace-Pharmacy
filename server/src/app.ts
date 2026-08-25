@@ -41,6 +41,10 @@ import reportRoutes           from './routes/reportRoutes';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 import { startCronJobs }      from './services/cronService';
 import { auditLogger }        from './middleware/auditLogger';
+import importRoutes           from './routes/importRoutes';
+import complianceRoutes       from './routes/complianceRoutes';
+import procurementRoutes      from './routes/procurementRoutes';
+import financialRoutes        from './routes/financialRoutes';
 
 const app = express();
 
@@ -181,6 +185,10 @@ app.use('/api/reports',   ...strictAdminGuard, reportRoutes);
 app.use('/api/analytics', ...strictAdminGuard, analyticsRoutes);
 app.use('/api/users',     ...strictAdminGuard, userRouter);
 app.use('/api/audit-logs',  ...strictAdminGuard, auditRouter);
+app.use('/api/admin/import', ...strictAdminGuard, importRoutes);
+app.use('/api/admin/compliance', ...strictAdminGuard, complianceRoutes);
+app.use('/api/procurement', procurementRoutes);
+app.use('/api/financials', financialRoutes);
 
 app.use('/api/messages', protect, messageRouter);
 

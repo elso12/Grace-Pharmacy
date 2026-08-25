@@ -47,16 +47,46 @@ export const getAnalyticsSummary = async (req: Request, res: Response): Promise<
       }
     });
 
-    // 3. Expiring Batches Count (within next 30 days)
+    // 3. Expiring Batches Count & Loss Risk (within next 30 days)
     const now = new Date();
     const thirtyDaysFromNow = new Date();
     thirtyDaysFromNow.setDate(now.getDate() + 30);
 
-    const expiringBatchesCount = await InventoryBatch.countDocuments({
+    const expiringBatches = await InventoryBatch.find({
       status: BatchStatus.ACTIVE,
       expiryDate: { $lte: thirtyDaysFromNow, $gte: now },
       quantity: { $gt: 0 }
     });
+    
+    const expiringBatchesCount = expiringBatches.length;
+    let nearExpiryLossRisk = 0;
+    expiringBatches.forEach(batch => {
+      nearExpiryLossRisk += batch.quantity * (batch.costPrice || 0); // Assuming costPrice exists, if not 0
+    });
+
+    // 3b. Stockout Rate
+    const totalProducts = await Product.countDocuments({ isActive: true });
+    // Any product not in stockMap or with 0 total stock is a stockout
+    let outOfStockCount = 0;
+    products.forEach(product => {
+      const stock = stockMap.get(product._id.toString()) || 0;
+      if (stock === 0) outOfStockCount++;
+    });
+    const stockoutRate = totalProducts > 0 ? (outOfStockCount / totalProducts) * 100 : 0;
+
+    // 3c. Prescription Turnaround Time (Mock since we don't have exact timestamps for Queue -> Dispensed)
+    const avgPrescriptionTurnaround = "15 mins"; // Mock data for now
+
+    // 3d. Payment Channel Split
+    const salesByPayment = await Sale.aggregate([
+      { $match: { status: SaleStatus.COMPLETED } },
+      { $group: { _id: "$paymentMethod", count: { $sum: 1 } } }
+    ]);
+    const totalSalesByPayment = salesByPayment.reduce((sum, item) => sum + item.count, 0);
+    const paymentChannelSplit = salesByPayment.map(item => ({
+      method: item._id,
+      percentage: totalSalesByPayment > 0 ? (item.count / totalSalesByPayment) * 100 : 0
+    }));
 
     // 4. Recent Transactions (Merge Sales and Orders)
     const recentSales = await Sale.find().sort({ createdAt: -1 }).limit(5).populate('customer', 'firstName lastName');
@@ -135,7 +165,11 @@ export const getAnalyticsSummary = async (req: Request, res: Response): Promise<
         lowStockCount,
         expiringBatchesCount,
         recentTransactions,
-        salesTrend
+        salesTrend,
+        stockoutRate,
+        nearExpiryLossRisk,
+        avgPrescriptionTurnaround,
+        paymentChannelSplit
       }
     });
   } catch (error: any) {

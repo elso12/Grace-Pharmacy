@@ -18,7 +18,10 @@ import {
   ShoppingBag,
   MessageSquare,
   Truck,
-  ClipboardCheck
+  ClipboardCheck,
+  Database,
+  ShieldAlert,
+  Activity
 } from 'lucide-react';
 import NotificationBell from './NotificationBell';
 import LiveChatWidget from './LiveChatWidget';
@@ -53,6 +56,10 @@ const navItems: NavItem[] = [
   { path: '/admin/suppliers', label: 'Suppliers', icon: <Truck size={20} />, roles: ['ADMIN'] },
   { path: '/admin/users', label: 'Users & Roles', icon: <Users size={20} />, roles: ['ADMIN'] },
   { path: '/admin/audit', label: 'Audit Logs', icon: <Settings size={20} />, roles: ['ADMIN'] },
+  { path: '/admin/compliance', label: 'Compliance', icon: <ShieldAlert size={20} />, roles: ['ADMIN'] },
+  { path: '/admin/procurement', label: 'Procurement', icon: <Truck size={20} />, roles: ['ADMIN'] },
+  { path: '/admin/pnl-reports', label: 'P&L Statement', icon: <Activity size={20} />, roles: ['ADMIN'] },
+  { path: '/admin/data-migration', label: 'Data Migration', icon: <Database size={20} />, roles: ['ADMIN'] },
   { path: '/admin/settings', label: 'Settings', icon: <Settings size={20} />, roles: ['ADMIN'] },
 ];
 
