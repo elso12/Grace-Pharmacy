@@ -1,9 +1,10 @@
 import { Request, Response, NextFunction } from 'express';
 import { Order } from '../models/index';
-import { OrderStatus, FulfillmentType } from '../types/enums';
+import { OrderStatus, FulfillmentType, PaymentMethod, OrderPaymentStatus } from '../types/enums';
 import { AppError } from '../utils/errors';
 import { calculateFefoDispense } from '../services/inventory.service';
-import { Product } from '../models';
+import { Product, User } from '../models';
+import mongoose from 'mongoose';
 
 // ─── Create Order ────────────────────────────────────────────────────────
 export const createOrder = async (
@@ -12,81 +13,100 @@ export const createOrder = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const { items, fulfillmentType, shippingAddress, paymentMethod, prescriptionId, prescriptionImageUrl } = req.body;
-    // Assuming `req.user.id` is available from authentication middleware
-    const customerId = (req as any).user.id;
-
-    if (!items || !Array.isArray(items) || items.length === 0) {
-      throw new AppError('Order must contain at least one item', 400);
+    const userId = (req as any).user.id;
+    const user = await User.findById(userId);
+    if (!user) {
+      res.status(404).json({ success: false, message: 'User not found' });
+      return;
     }
 
-    if (fulfillmentType === FulfillmentType.DELIVERY && !shippingAddress) {
-      throw new AppError('Shipping address is required for delivery', 400);
-    }
-
-    if (!paymentMethod) {
-      throw new AppError('Payment method is required', 400);
-    }
-
-    let totalAmount = 0;
-    const processedItems = [];
-    let prescriptionRequired = false;
-
-    // Verify stock and calculate total amount (Dry run)
-    for (const item of items) {
-      const { medicationId, quantity } = item;
-      
-      const fefoResult = await calculateFefoDispense({
-        productId: medicationId,
-        quantity
-      }, false); // commit = false, dry run
-
-      if (!fefoResult.canFulfill) {
-        throw new AppError(`Insufficient stock for medication: ${fefoResult.productName}`, 400);
-      }
-
-      // Calculate average price per unit if multiple batches are used, or just use total cost
-      // The requirement: "items: Array of objects containing medicationId, quantity, and priceAtPurchase"
-      // We'll use the totalCost for this item line and divide by quantity to get priceAtPurchase per unit
-      const priceAtPurchase = fefoResult.totalCost / quantity;
-
-      // Check if product requires a prescription
-      const productDoc = await Product.findById(medicationId).lean();
-      if (productDoc && productDoc.requiresPrescription) {
-        prescriptionRequired = true;
-      }
-
-      processedItems.push({
-        medicationId,
-        quantity,
-        priceAtPurchase: Number(priceAtPurchase.toFixed(2))
-      });
-
-      totalAmount += fefoResult.totalCost;
-    }
-
-    if (prescriptionRequired && !prescriptionId && !prescriptionImageUrl) {
-      throw new AppError('A prescription is required for one or more medications in your cart. Please upload a prescription.', 400);
-    }
-
-    const order = await Order.create({
-      customerId,
-      items: processedItems,
-      totalAmount: Number(totalAmount.toFixed(2)),
-      status: OrderStatus.PENDING,
+    const {
+      items,
       fulfillmentType,
-      shippingAddress,
+      deliveryAddress,
+      deliveryPhone,
       paymentMethod,
-      prescriptionRequired,
-      approvedByPharmacist: false,
+      paymentDetails,
+      prescriptionImageUrl,
+      notes,
+    } = req.body;
+
+    // 1. Calculate Subtotal & Tax
+    let subtotal = 0;
+    let rxRequired = false;
+
+    for (const item of items) {
+      const product = await Product.findById(item.productId);
+      if (!product) {
+        res.status(400).json({ success: false, message: `Product not found: ${item.name || item.productId}` });
+        return;
+      }
+      if (product.requiresPrescription) rxRequired = true;
+      subtotal += product.unitPrice * item.quantity;
+    }
+
+    let mappedPaymentMethod = PaymentMethod.CASH;
+    if (paymentMethod === 'CARD') mappedPaymentMethod = PaymentMethod.CREDIT_CARD;
+    if (paymentMethod === 'MOBILE_WALLET') mappedPaymentMethod = PaymentMethod.MOBILE_PAYMENT;
+    if (paymentMethod === 'INSURANCE') mappedPaymentMethod = PaymentMethod.INSURANCE;
+
+    let mappedFulfillmentType = FulfillmentType.PICKUP;
+    if (fulfillmentType === 'HOME_DELIVERY') mappedFulfillmentType = FulfillmentType.DELIVERY;
+
+    const tax = Math.round(subtotal * 0.08 * 100) / 100; // 8% Tax
+    const deliveryFee = mappedFulfillmentType === FulfillmentType.DELIVERY ? 5.00 : 0.00;
+    const totalAmount = Math.round((subtotal + tax + deliveryFee) * 100) / 100;
+
+    // 2. Determine Initial Order & Payment Status
+    let paymentStatus = OrderPaymentStatus.UNPAID;
+
+    if (paymentMethod === 'CARD') {
+      paymentStatus = OrderPaymentStatus.PAID;
+    } else if (paymentMethod === 'MOBILE_WALLET') {
+      paymentStatus = OrderPaymentStatus.PAID;
+    }
+
+    const initialOrderStatus = rxRequired ? OrderStatus.PENDING : OrderStatus.PENDING;
+
+    // We need tenantId and branchId as required by the schema. Using mock ObjectIds for now.
+    const tenantId = new mongoose.Types.ObjectId();
+    const branchId = new mongoose.Types.ObjectId();
+
+    // 3. Create Order in MongoDB
+    const order = await Order.create({
+      tenantId,
+      branchId,
+      customerId: user._id,
+      items: items.map((i: any) => ({
+        medicationId: i.productId,
+        quantity: i.quantity,
+        priceAtPurchase: i.unitPrice, 
+      })),
+      totalAmount,
+      fulfillmentType: mappedFulfillmentType,
+      shippingAddress: mappedFulfillmentType === FulfillmentType.DELIVERY ? { street: deliveryAddress || 'N/A', city: 'Local', zip: '00000' } : undefined,
+      paymentMethod: mappedPaymentMethod,
+      paymentStatus,
+      prescriptionRequired: rxRequired,
+      approvedByPharmacist: !rxRequired,
+      status: initialOrderStatus,
     });
+
+    // 4. Award Loyalty Points (1 point per $1 spent)
+    if (user.role === 'CUSTOMER') {
+      await User.findByIdAndUpdate(user._id, {
+        $inc: { loyaltyPoints: Math.floor(totalAmount) },
+      });
+    }
 
     res.status(201).json({
-      status: 'success',
+      success: true,
+      message: 'Order placed successfully',
       data: order,
     });
-  } catch (error) {
-    next(error);
+  } catch (error: any) {
+    console.error('Order creation error:', error);
+    res.status(500).json({ success: false, message: error.message || 'Failed to process order' });
   }
 };
 

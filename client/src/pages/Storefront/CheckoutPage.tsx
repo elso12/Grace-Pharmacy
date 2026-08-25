@@ -4,8 +4,8 @@ import { ShoppingCart, Trash2, Plus, Minus, MapPin, Package, Truck, CheckCircle2
 import { useCart } from '../../context/CartContext';
 import api from '../../services/api';
 
-// ── Types ─────────────────────────────────────────────────────────────────────
-type FulfillmentType = 'PICKUP' | 'DELIVERY';
+type FulfillmentType = 'STORE_PICKUP' | 'HOME_DELIVERY';
+type PaymentMethodType = 'CASH' | 'CARD' | 'MOBILE_WALLET' | 'INSURANCE';
 
 interface ShippingForm {
   firstName:       string;
@@ -16,9 +16,17 @@ interface ShippingForm {
   city:            string;
   zip:             string;
   fulfillmentType: FulfillmentType;
-  paymentMethod:   string;
+  paymentMethod:   PaymentMethodType;
   notes:           string;
   prescriptionImageUrl?: string;
+  // Payment Details
+  cardNumber?: string;
+  cardExpiry?: string;
+  cardCvc?: string;
+  walletPhone?: string;
+  walletProvider?: string;
+  insuranceProvider?: string;
+  policyNumber?: string;
 }
 
 const INITIAL_FORM: ShippingForm = {
@@ -29,10 +37,17 @@ const INITIAL_FORM: ShippingForm = {
   address:         '',
   city:            '',
   zip:             '',
-  fulfillmentType: 'DELIVERY',
-  paymentMethod:   'CREDIT_CARD',
+  fulfillmentType: 'HOME_DELIVERY',
+  paymentMethod:   'CARD',
   notes:           '',
   prescriptionImageUrl: '',
+  cardNumber: '',
+  cardExpiry: '',
+  cardCvc: '',
+  walletPhone: '',
+  walletProvider: 'Telebirr',
+  insuranceProvider: '',
+  policyNumber: '',
 };
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -50,11 +65,11 @@ const CheckoutPage: React.FC = () => {
   const [successMsg,  setSuccessMsg]  = useState<string | null>(null);
 
   // ── Derived totals ──────────────────────────────────────────────────────
-  const DELIVERY_FEE    = form.fulfillmentType === 'DELIVERY' ? 5.99 : 0;
-  const TAX_RATE        = 0.0875; // 8.75 %
+  const DELIVERY_FEE    = form.fulfillmentType === 'HOME_DELIVERY' ? 5.00 : 0;
+  const TAX_RATE        = 0.08; // 8% tax
   const subtotal        = cartTotal;
-  const tax             = subtotal * TAX_RATE;
-  const orderTotal      = subtotal + tax + DELIVERY_FEE;
+  const tax             = Math.round(subtotal * TAX_RATE * 100) / 100;
+  const orderTotal      = Math.round((subtotal + tax + DELIVERY_FEE) * 100) / 100;
   
   const hasRxItems = items.some(item => item.requiresPrescription);
 
@@ -70,7 +85,7 @@ const CheckoutPage: React.FC = () => {
     form.firstName.trim() &&
     form.lastName.trim()  &&
     form.email.trim()     &&
-    (form.fulfillmentType === 'PICKUP' || (form.address.trim() && form.city.trim() && form.zip.trim())) &&
+    (form.fulfillmentType === 'STORE_PICKUP' || (form.address.trim() && form.city.trim() && form.zip.trim())) &&
     (!hasRxItems || form.prescriptionImageUrl?.trim());
 
   // ── Submit ──────────────────────────────────────────────────────────────
@@ -82,28 +97,27 @@ const CheckoutPage: React.FC = () => {
     setError(null);
 
     try {
-      // The api instance's request interceptor automatically attaches
-      // the Authorization: Bearer <token> header from localStorage.
       await api.post('/orders/checkout', {
         items: items.map((item) => ({
           productId: item.id,
           name:      item.name,
-          price:     item.price,
+          unitPrice: item.price,
           quantity:  item.quantity,
         })),
-        shippingAddress: {
-          street:  form.address,
-          city:    form.city,
-          zip:     form.zip,
-        },
         fulfillmentType: form.fulfillmentType,
-        paymentMethod:   form.paymentMethod,
-        notes:           form.notes,
-        subtotal,
-        tax,
-        deliveryFee:     DELIVERY_FEE,
-        total:           orderTotal,
+        deliveryAddress: form.fulfillmentType === 'HOME_DELIVERY' ? `${form.address}, ${form.city}, ${form.zip}` : undefined,
+        deliveryPhone: form.phone,
+        paymentMethod: form.paymentMethod,
+        paymentDetails: {
+          cardNumber: form.cardNumber,
+          cardExpiry: form.cardExpiry,
+          walletPhone: form.walletPhone,
+          walletProvider: form.walletProvider,
+          insuranceProvider: form.insuranceProvider,
+          policyNumber: form.policyNumber,
+        },
         prescriptionImageUrl: form.prescriptionImageUrl,
+        notes: form.notes,
       });
 
       // ✅ Success path
@@ -286,10 +300,10 @@ const CheckoutPage: React.FC = () => {
                 </div>
                 <div className="flex justify-between text-sm text-slate-600">
                   <span>
-                    {form.fulfillmentType === 'PICKUP' ? 'Pickup (free)' : 'Delivery fee'}
+                    {form.fulfillmentType === 'STORE_PICKUP' ? 'Pickup (free)' : 'Delivery fee'}
                   </span>
                   <span className="tabular-nums">
-                    {form.fulfillmentType === 'PICKUP' ? '—' : fmt(DELIVERY_FEE)}
+                    {form.fulfillmentType === 'STORE_PICKUP' ? '—' : fmt(DELIVERY_FEE)}
                   </span>
                 </div>
                 <div className="flex justify-between text-base font-extrabold text-slate-900 pt-2 border-t border-slate-200">
@@ -317,7 +331,7 @@ const CheckoutPage: React.FC = () => {
                 <label
                   htmlFor="fulfillment-pickup"
                   className={`flex flex-col items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all ${
-                    form.fulfillmentType === 'PICKUP'
+                    form.fulfillmentType === 'STORE_PICKUP'
                       ? 'border-blue-600 bg-blue-50'
                       : 'border-slate-200 hover:border-slate-300'
                   }`}
@@ -326,14 +340,14 @@ const CheckoutPage: React.FC = () => {
                     id="fulfillment-pickup"
                     type="radio"
                     name="fulfillmentType"
-                    value="PICKUP"
-                    checked={form.fulfillmentType === 'PICKUP'}
+                    value="STORE_PICKUP"
+                    checked={form.fulfillmentType === 'STORE_PICKUP'}
                     onChange={handleField}
                     className="sr-only"
                   />
-                  <Package className={`h-6 w-6 ${form.fulfillmentType === 'PICKUP' ? 'text-blue-600' : 'text-slate-400'}`} />
+                  <Package className={`h-6 w-6 ${form.fulfillmentType === 'STORE_PICKUP' ? 'text-blue-600' : 'text-slate-400'}`} />
                   <div className="text-center">
-                    <p className={`text-sm font-bold ${form.fulfillmentType === 'PICKUP' ? 'text-blue-700' : 'text-slate-700'}`}>
+                    <p className={`text-sm font-bold ${form.fulfillmentType === 'STORE_PICKUP' ? 'text-blue-700' : 'text-slate-700'}`}>
                       Store Pickup
                     </p>
                     <p className="text-xs text-slate-500 mt-0.5">Free · Ready in 30 min</p>
@@ -344,7 +358,7 @@ const CheckoutPage: React.FC = () => {
                 <label
                   htmlFor="fulfillment-delivery"
                   className={`flex flex-col items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all ${
-                    form.fulfillmentType === 'DELIVERY'
+                    form.fulfillmentType === 'HOME_DELIVERY'
                       ? 'border-blue-600 bg-blue-50'
                       : 'border-slate-200 hover:border-slate-300'
                   }`}
@@ -353,17 +367,17 @@ const CheckoutPage: React.FC = () => {
                     id="fulfillment-delivery"
                     type="radio"
                     name="fulfillmentType"
-                    value="DELIVERY"
-                    checked={form.fulfillmentType === 'DELIVERY'}
+                    value="HOME_DELIVERY"
+                    checked={form.fulfillmentType === 'HOME_DELIVERY'}
                     onChange={handleField}
                     className="sr-only"
                   />
-                  <Truck className={`h-6 w-6 ${form.fulfillmentType === 'DELIVERY' ? 'text-blue-600' : 'text-slate-400'}`} />
+                  <Truck className={`h-6 w-6 ${form.fulfillmentType === 'HOME_DELIVERY' ? 'text-blue-600' : 'text-slate-400'}`} />
                   <div className="text-center">
-                    <p className={`text-sm font-bold ${form.fulfillmentType === 'DELIVERY' ? 'text-blue-700' : 'text-slate-700'}`}>
+                    <p className={`text-sm font-bold ${form.fulfillmentType === 'HOME_DELIVERY' ? 'text-blue-700' : 'text-slate-700'}`}>
                       Home Delivery
                     </p>
-                    <p className="text-xs text-slate-500 mt-0.5">{fmt(5.99)} · Within 2 hrs</p>
+                    <p className="text-xs text-slate-500 mt-0.5">{fmt(5.00)} · Within 2 hrs</p>
                   </div>
                 </label>
               </div>
@@ -373,7 +387,7 @@ const CheckoutPage: React.FC = () => {
             <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
               <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-5 flex items-center gap-2">
                 <MapPin className="h-4 w-4 text-slate-500" />
-                {form.fulfillmentType === 'PICKUP' ? 'Contact Details' : 'Shipping Details'}
+                {form.fulfillmentType === 'STORE_PICKUP' ? 'Contact Details' : 'Shipping Details'}
               </h2>
 
               <div className="space-y-4">
@@ -449,8 +463,8 @@ const CheckoutPage: React.FC = () => {
                   />
                 </div>
 
-                {/* Address fields — only shown for DELIVERY */}
-                {form.fulfillmentType === 'DELIVERY' && (
+                {/* Address fields — only shown for HOME_DELIVERY */}
+                {form.fulfillmentType === 'HOME_DELIVERY' && (
                   <>
                     <div>
                       <label htmlFor="checkout-address" className="block text-xs font-semibold text-slate-600 mb-1.5">
@@ -462,7 +476,7 @@ const CheckoutPage: React.FC = () => {
                         type="text"
                         value={form.address}
                         onChange={handleField}
-                        required={form.fulfillmentType === 'DELIVERY'}
+                        required={form.fulfillmentType === 'HOME_DELIVERY'}
                         autoComplete="street-address"
                         placeholder="123 Main Street, Apt 4B"
                         className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
@@ -480,7 +494,7 @@ const CheckoutPage: React.FC = () => {
                           type="text"
                           value={form.city}
                           onChange={handleField}
-                          required={form.fulfillmentType === 'DELIVERY'}
+                          required={form.fulfillmentType === 'HOME_DELIVERY'}
                           autoComplete="address-level2"
                           placeholder="New York"
                           className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
@@ -496,7 +510,7 @@ const CheckoutPage: React.FC = () => {
                           type="text"
                           value={form.zip}
                           onChange={handleField}
-                          required={form.fulfillmentType === 'DELIVERY'}
+                          required={form.fulfillmentType === 'HOME_DELIVERY'}
                           autoComplete="postal-code"
                           placeholder="10001"
                           className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
@@ -522,12 +536,73 @@ const CheckoutPage: React.FC = () => {
                   onChange={handleField}
                   className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                 >
-                  <option value="CREDIT_CARD">Credit Card</option>
-                  <option value="DEBIT_CARD">Debit Card</option>
-                  <option value="MOBILE_PAYMENT">Mobile Wallet</option>
+                  <option value="CARD">Credit / Debit Card</option>
+                  <option value="MOBILE_WALLET">Mobile Wallet</option>
+                  <option value="INSURANCE">Health Insurance</option>
                   <option value="CASH">Cash on Delivery / Pickup</option>
-                  <option value="INSURANCE">Insurance Co-Pay</option>
                 </select>
+              </div>
+              
+              <div className="mt-6">
+                {form.paymentMethod === 'CASH' && (
+                  <div className="flex items-start gap-3 bg-blue-50 border border-blue-200 text-blue-800 px-5 py-4 rounded-xl text-sm">
+                    <CheckCircle2 className="h-5 w-5 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-semibold">Pay with cash upon order handover</p>
+                      <p className="mt-0.5 text-blue-700">Please have exact change ready if possible.</p>
+                    </div>
+                  </div>
+                )}
+                
+                {form.paymentMethod === 'CARD' && (
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-600 mb-1.5">Card Number <span className="text-rose-500">*</span></label>
+                      <input name="cardNumber" type="text" value={form.cardNumber} onChange={handleField} required placeholder="0000 0000 0000 0000" className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-600 mb-1.5">Expiration Date <span className="text-rose-500">*</span></label>
+                        <input name="cardExpiry" type="text" value={form.cardExpiry} onChange={handleField} required placeholder="MM/YY" className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-600 mb-1.5">CVC <span className="text-rose-500">*</span></label>
+                        <input name="cardCvc" type="text" value={form.cardCvc} onChange={handleField} required placeholder="123" className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" />
+                      </div>
+                    </div>
+                  </div>
+                )}
+                
+                {form.paymentMethod === 'MOBILE_WALLET' && (
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-600 mb-1.5">Wallet Provider <span className="text-rose-500">*</span></label>
+                      <select name="walletProvider" value={form.walletProvider} onChange={handleField} className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all">
+                        <option value="Telebirr">Telebirr</option>
+                        <option value="CBE Birr">CBE Birr</option>
+                        <option value="Apple Pay">Apple Pay</option>
+                        <option value="Google Pay">Google Pay</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-600 mb-1.5">Wallet Phone / Account <span className="text-rose-500">*</span></label>
+                      <input name="walletPhone" type="text" value={form.walletPhone} onChange={handleField} required placeholder="+1 (555) 000-0000" className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" />
+                    </div>
+                  </div>
+                )}
+                
+                {form.paymentMethod === 'INSURANCE' && (
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-600 mb-1.5">Insurance Provider <span className="text-rose-500">*</span></label>
+                      <input name="insuranceProvider" type="text" value={form.insuranceProvider} onChange={handleField} required placeholder="Provider Name" className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-600 mb-1.5">Policy / Member ID <span className="text-rose-500">*</span></label>
+                      <input name="policyNumber" type="text" value={form.policyNumber} onChange={handleField} required placeholder="Member ID" className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all" />
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 

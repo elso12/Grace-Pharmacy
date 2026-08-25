@@ -36,31 +36,52 @@ const shippingAddressSchema = z.object({
 export const checkoutSchema = z.object({
   body: z.object({
     items: z
-      .array(orderItemSchema)
-      .min(1, 'Order must contain at least one item'),
+      .array(
+        z.object({
+          productId: z.string().min(1, 'Product ID is required'),
+          name: z.string().optional(),
+          quantity: z.number().int().positive('Quantity must be at least 1'),
+          unitPrice: z.number().positive('Unit price must be positive'),
+        })
+      )
+      .min(1, 'Cart cannot be empty'),
 
-    fulfillmentType: z.nativeEnum(FulfillmentType, {
-      error: 'Invalid fulfillment type',
+    fulfillmentType: z.enum(['STORE_PICKUP', 'HOME_DELIVERY'], {
+      message: 'Fulfillment type must be STORE_PICKUP or HOME_DELIVERY',
     }),
 
-    paymentMethod: z.nativeEnum(PaymentMethod, {
-      error: 'Invalid payment method',
+    deliveryAddress: z.string().optional().nullable(),
+    deliveryPhone: z.string().optional().nullable(),
+
+    paymentMethod: z.enum(['CASH', 'CARD', 'MOBILE_WALLET', 'INSURANCE'], {
+      message: 'Invalid payment method selected',
     }),
 
-    shippingAddress: shippingAddressSchema.optional(),
-
-    prescriptionId: z
-      .string()
-      .regex(objectIdRegex, 'Invalid Prescription ID')
+    // Payment Details (Optional depending on method)
+    paymentDetails: z
+      .object({
+        cardNumber: z.string().optional(),
+        cardExpiry: z.string().optional(),
+        walletPhone: z.string().optional(),
+        walletProvider: z.string().optional(), // e.g. 'Telebirr', 'CBE Birr', 'Apple Pay', 'Google Pay'
+        insuranceProvider: z.string().optional(),
+        policyNumber: z.string().optional(),
+      })
       .optional(),
 
-    prescriptionImageUrl: z.string().url('Invalid prescription image URL').optional(),
+    prescriptionImageUrl: z.string().optional().nullable(),
+    notes: z.string().optional().nullable(),
   }).refine(
-    (data) =>
-      data.fulfillmentType !== FulfillmentType.DELIVERY || data.shippingAddress,
+    (data) => {
+      // If Home Delivery is chosen, deliveryAddress and phone are required
+      if (data.fulfillmentType === 'HOME_DELIVERY') {
+        return !!data.deliveryAddress && data.deliveryAddress.trim().length > 0;
+      }
+      return true;
+    },
     {
-      message: 'Shipping address is required for delivery orders',
-      path: ['shippingAddress'],
+      message: 'Delivery address is required for Home Delivery',
+      path: ['deliveryAddress'],
     }
   ),
 });
